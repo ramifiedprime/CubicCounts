@@ -1,7 +1,5 @@
-function CCFCCF(X,M)
-
-    function init(X,M)
-        p:=PrimesUpTo(Floor(Sqrt(X)));
+    function init(X,M:verbose:=false)
+        p:=PrimesUpTo(X);
         pp:=[x^2 : x in p];
 
         function inittest1(q,MMM)
@@ -50,7 +48,7 @@ function CCFCCF(X,M)
             end for;
         end for;
 
-        sqfull:=[false:n in [1..Floor(Sqrt(3*X))]];
+        sqfull:=[false:n in [1..3*X]];
         for n in [1..#sqfull] do
             for qq in pp[3..#pp] do
                 if (n mod qq) eq 0 then
@@ -63,12 +61,12 @@ function CCFCCF(X,M)
         return p,pp,index,list,sqfull;
     end function;
 
-
-    X:=2^(20); M:=2^(18); stX:=Floor(Sqrt(3*X));
+function CCFCCF_prp(X,M:verbose:=false)
+    stX:=Floor(Sqrt(3*X));
     // p,pp,index,list,sqfull := init(2^(20),2^(18));
-    printf("Initialising...");
+    if verbose then printf("Initialising..."); end if;
     p,pp,index,list,sqfull := init(X,M);
-    printf("\nInitialisation complete.");
+    if verbose then printf("\nInitialisation complete."); end if;
 
     // Assumes input form is in U2
     function test(f,a,b,c,d,D)
@@ -99,11 +97,10 @@ function CCFCCF(X,M)
         return true;
     end function;
 
-    function is_complex_field(a,b,c,d,P,Q,R,D)
+    function is_complex_field(a,b,c,d,P,Q,R,D,f)
         if (D le 0) or (D mod 16 eq 0) or (D mod 16 eq 4 and (IsOdd(P) or IsOdd(R))) then
             return false; // second cdn disallows [1,0,3,2]
         end if;
-        f:=GCD([P,Q,R]);
         return test(f,a,b,c,d,D);
     end function;
 
@@ -116,9 +113,9 @@ function CCFCCF(X,M)
 
 
     fields:=[];
-    printf("\nRunning loops with b=0...");
-    for a in [1..Floor((16*X/27)^(1/4))],
-        c in [1..Floor((X/(4*a))^(1/3))] do
+    if verbose then printf("\nBeginning field search\nRunning loops with b=0..."); end if;
+    for a in [1..Floor((16*X^2/27)^(1/4))],
+        c in [1..Floor((X^2/(4*a))^(1/3))] do
         lbd:=0;
         if c le a then
             lbd:=Floor(Sqrt(a*(a-c)));
@@ -129,18 +126,19 @@ function CCFCCF(X,M)
             Q:= -9*a*d;
             R:= c^2;
             D:=Q^2-4*P*R;
-            if D gt 3*X then continue; end if;
-            if is_complex_field(a, 0, c, d, P, Q, R, D) then
+            f:=GCD([P,Q,R]);
+            if D gt 3*X*f then continue; end if;
+            if is_complex_field(a, 0, c, d, P, Q, R, D, f) then
                 Append(~fields, [a,0,c,d]);
             end if;
         end for;
     end for;
-    printf("\nLoops complete.");
+    if verbose then printf("\nb=0 loops complete."); end if;
 
-    printf("\nRunning loops with b>0...");
-    for a in [1..Floor((16*X/27)^(1/4))],
-        b in [1..Floor((3*a/2) + Sqrt((X/3)^(1/2)-(3*a^2/4)))],
-        c in [(1-b)..Floor(U(a,b)+(X/(4*a))^(1/3))],
+    if verbose then printf("\nRunning loops with b>0..."); end if;
+    for a in [1..Floor((16*X^2/27)^(1/4))],
+        b in [1..Floor((3*a/2) + Sqrt((X^2/3)^(1/2)-(3*a^2/4)))],
+        c in [(1-b)..Floor(U(a,b)+(X^2/(4*a))^(1/3))],
         d in [Floor((-(a-b)^2-a*c+b*c)/a)+1..Ceiling(((a+b)*(a+b+c))/a)-1] //Lemma 4.2 (13) for both 
         do
         // if d*(d-b) le a*(a-c) then continue; end if;
@@ -154,11 +152,12 @@ function CCFCCF(X,M)
         Q:= b*c-9*a*d;
         R:= c^2-3*b*d;
         D:=Q^2-4*P*R;
-        if D gt 3*X then continue; end if;
-        if is_complex_field(a, b, c, d, P, Q, R, D) then
+        f:=GCD([P,Q,R]);
+        if D gt 3*X*f then continue; end if;
+        if is_complex_field(a, b, c, d, P, Q, R, D, f) then
             Append(~fields, [a,b,c,d]);
         end if;
     end for;
-
+    if verbose then printf("\nAlgorithm completed successfully."); end if;
     return fields;
 end function;

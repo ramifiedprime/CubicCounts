@@ -129,7 +129,7 @@ function CCFCCF_prp(X,M:verbose:=false)
             f:=GCD([P,Q,R]);
             if D gt 3*X*f then continue; end if;
             if is_complex_field(a, 0, c, d, P, Q, R, D, f) then
-                Append(~fields, [a,0,c,d]);
+                Append(~fields, [a,0,c,d,-3*D/(f^2),f]);
             end if;
         end for;
     end for;
@@ -155,7 +155,7 @@ function CCFCCF_prp(X,M:verbose:=false)
         f:=GCD([P,Q,R]);
         if D gt 3*X*f then continue; end if;
         if is_complex_field(a, b, c, d, P, Q, R, D, f) then
-            Append(~fields, [a,b,c,d]);
+            Append(~fields, [a,b,c,d,-3*D/(f^2),f]);
         end if;
     end for;
     if verbose then printf("\nAlgorithm completed successfully."); end if;

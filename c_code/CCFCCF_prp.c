@@ -88,24 +88,48 @@ int init_index_find(int* p, int X, int M){
     return i;
 }
 
+int* get_list(int* pp, int index, int X){
+    int k,r,x,i,num;
+    _Bool* blist = (_Bool*)calloc(X+1, sizeof(_Bool));//blist[n]=true iff n divisible by pp[i] for some i at least index
+    for(k=4; k<=X/6; k++){
+        for(r=-1; r<=1; r+=2){
+            x=6*k+r;
+            for(i=index; i<=pp[0] && pp[i]<=x; i++){
+                if(x%pp[i] == 0){
+                    blist[x] = 1;
+                    num+=1;
+                    break;
+                }
+            }
+        }
+    }
+    int* list = (int*)calloc(num+1, sizeof(int));
+    list[0]=num;
+    r = 1;
+    for(k=0; k<=X; k++){
+        if(blist[k]){
+            list[r]=k;
+            r++;
+        }
+    }
+    return list;
+}
 
-////////////////////////////////////////////////////////////////////////////////
-// init functions from Belabas, sub-algorithm 5.1
-// Input:
-//      - 
-// Output:
-//      - 
-// int init(int X, int sqrtX, int M){
-//     int* p = primes_up_to(X, sqrtX);
-//     int* pp = (int*)calloc(p[0],sizeof(int))
-//     int i;
-//     for(i=1;i<=p[0]; i++){
-//         pp[i]=p[i]*p[i];
-//     }
-//     // TEST 1
-//     i=(q+1)/2;
+int* get_sqfull(int* pp, int sqrtX){
+    int i,n;
+    float sqrt3X=floor(1.7320508075688772*sqrtX);
+    _Bool* sqfull = (_Bool*)calloc(sqrt3X+1, sizeof(_Bool));
+    for(n=2; n<=sqrt3X; i++){
+        for(i=3; i<=pp[0] && pp[i]<=n; i++){
+            if(n%pp[i]==0){
+                sqfull[n]=1;
+            }
+        }
+    }
+    return sqfull;
+}
 
-// }
+
 
 
 
@@ -116,6 +140,12 @@ int main(void){
     int sqrtX=power(2,10);
     int M=power(2,20);
     int* p = primes_up_to(X,sqrtX);
+    int* pp[p[0]+1];
+    int i;
+    pp[0]=p[0];
+    for(i=0; i<=pp[0]; i++){
+        pp[i]=p[i]*p[i];
+    }
     printf("%d primes found\n", p[0]);
     int index = init_index_find(p, X, M);
     return 0;

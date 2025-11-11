@@ -111,7 +111,6 @@ long* get_list(long* pp, long index, long X){
     i=1;
     for(x=6; x<=X+1; x+=6){
         for(k=-1;k<=1 && x+k<=X;k+=2){
-            if(x+k==7975){printf("FOUND IT: position=%ld\n", i);}
             if(blist[x+k]){list[i]=x+k;i++;}
         }
     }
@@ -225,8 +224,84 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
                 R= c*c;
                 D= Q*Q-4*P*R;
                 f=gcd(P,gcd(Q,R));
-                // if(D>3*B*f){continue;} // IF PRP
                 if(D>tX || D<=0){continue;} // IF DISC
+                if(is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
+                    fprintf(fptr,"[%ld,%d,%ld,%ld]\n",a,0,c,d);
+                }
+            }
+        }
+    }
+    if(verbose){printf("...done.\nWorking through b>0 cases...\n");}
+    for(a=1;a<=A_bd;a++){
+        B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
+        for(b=1; b<=B_bd; b++){ 
+            C_bd=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);
+            for(c=(1-b); c<=C_bd;c++){
+                D_lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
+                D_ubd = (((double)a+b)*(a+b+c))/a;
+                quadbd = a*(a-c);
+                for(d=D_lbd+1; d<D_ubd; d++){
+                    if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
+                    P= b*b-3*a*c;
+                    Q= b*c-9*a*d;
+                    R= c*c-3*b*d;
+                    D= Q*Q-4*P*R;
+                    f=gcd(P,gcd(Q,R));
+                    if (D>tX || D<=0){continue;} //IF DISC
+                    if(is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
+                        fprintf(fptr,"[%ld,%ld,%ld,%ld]\n",a,b,c,d);
+                    }
+                }
+            }
+        }
+    }
+    printf("...done.\n");
+    free(p);
+    free(pp);
+    free(sqfull);
+    free(list);
+    return 0;
+}
+
+//TODO finish proper looping condition from Belabas
+int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
+    long a,b,c,d,D,f,P,Q,R;
+    long i=0, X=B*B;
+    if(verbose){printf("Initialising...\n");}
+    long* p = primes_up_to(X,B);
+    if(verbose){printf("...p initialised\n");}
+    long* pp = (long*)malloc((p[0]+1)*sizeof(long));
+    pp[0]=p[0];
+    for(i=1; i<=p[0]; i++){
+        pp[i]=p[i]*p[i];
+    }
+    if(verbose){printf("...pp initialised\n");}
+    long index = init_index_find(p, X, X);
+    if(verbose){printf("...index found\n");}
+    long* sqfull = get_sqfull(pp,X);
+    if(verbose){printf("...sqfull initialised\n");}
+    long* list = get_list(pp, index, X);
+    if(verbose){printf("...list initialised\n");}
+    if(verbose){printf("...done.\n");}
+    // do looping
+    double A_bd,B_bd,C_bd,D_ubd;
+    long D_lbd;
+    A_bd=pow((16.0*X)/27, 1.0/4);
+    long quadbd;
+    // b=0 looping
+    if(verbose){printf("Working through b=0 cases...\n");}
+    for(a=1;a<=A_bd;a++){
+        C_bd=pow(((double)X)/(4*a), 1.0/3);
+        for(c=1; c<=C_bd; c++){
+            D_lbd=0;
+            if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
+            for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
+                P= -3*a*c;
+                Q= -9*a*d;
+                R= c*c;
+                D= Q*Q-4*P*R;
+                f=gcd(P,gcd(Q,R));
+                if(D>3*B*f){continue;} // IF PRP
                 if(is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
                     fprintf(fptr,"[%ld,%d,%ld,%ld]\n",a,0,c,d);
                 }
@@ -250,8 +325,7 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
                     R= c*c-3*b*d;
                     D= Q*Q-4*P*R;
                     f=gcd(P,gcd(Q,R));
-                    // if(D>3*B*f){continue;} //IF PRP
-                    if (D>tX || D<=0){continue;} //IF DISC
+                    if(D>3*B*f){continue;} //IF PRP
                     if(is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
                         fprintf(fptr,"[%ld,%ld,%ld,%ld]\n",a,b,c,d);
                     }
@@ -268,95 +342,9 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 int main(void){
-    FILE *fptr=fopen("output.dat","w");
-    CCFCCF(pow(2,15), fptr, 1);
+    FILE *fptr=fopen("output2.dat","w");
+    CCFCCFPRP(pow(2,15), fptr, 1);
     fclose(fptr);
-    // int i,r=15;
-    // long a,b,c,d,D,f,P,Q,R;
-    // long B=pow(2,r);
-    // long X=B*B;
-    // printf("Initialising...\n");
-    // long* p = primes_up_to(X,B);
-    // long* pp = (long*)malloc((p[0]+1)*sizeof(long));
-    // pp[0]=p[0];
-    // for(i=1; i<=p[0]; i++){
-    //     pp[i]=p[i]*p[i];
-    // }
-    // printf("...pp initialised\n");
-    // // get index, list, sqfull
-    // long index = init_index_find(p, X, X);
-    // printf("...index found\n");
-    // long* sqfull = get_sqfull(pp,X);
-    // printf("...sqfull initialised\n");
-    // long* list = get_list(pp, index, X);
-    // printf("...list initialised\n");
-    // printf("...done.\n");
-    // // do looping
-    // double A_bd=pow((16.0*X)/27, 1.0/4);
-    // long lbd;
-    // long quadbd;
-    // // b=0 looping
-    // printf("Working through b=0 cases...\n");
-    // for(a=1;a<=A_bd;a++){
-    //     for(c=1; c<=pow(((double)X)/(4*a), 1.0/3); c++){
-    //         lbd=0;
-    //         if(c<=a){lbd = (long)floor(sqrt(a*(a-c)));}
-    //         for(d=lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
-    //             P= -3*a*c;
-    //             Q= -9*a*d;
-    //             R= c*c;
-    //             D= Q*Q-4*P*R;
-    //             f=gcd(P,gcd(Q,R));
-    //             if(D>3*B*f){continue;} // IF PRP
-    //             // if(D/3+D%3>X){continue;} // IF DISC
-    //             // printf("[%d,%d,%d,%d]\n",a,0,c,d);
-    //             if(is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
-    //                 fprintf(fptr,"[%ld,%d,%ld,%ld]\n",a,0,c,d);
-    //             }
-    //             // printf("[%d,%d,%d,%d]\n",a,0,c,d);
-    //         }
-    //     }
-    // }
-    // printf("...done.\nWorking through b>0 cases...\n");
-    // for(a=1;a<=A_bd;a++){
-    //     for(b=1; b<=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4); b++){    
-    //         for(c=(1-b); c<=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);c++){
-    //             lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
-    //             quadbd = a*(a-c);
-    //             for(d=lbd+1; d<(((double)a+b)*(a+b+c))/a; d++){
-    //                 if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
-    //                 P= -3*a*c;
-    //                 Q= -9*a*d;
-    //                 R= c*c;
-    //                 D= Q*Q-4*P*R;
-    //                 f=gcd(P,gcd(Q,R));
-    //                 if(D>3*B*f){continue;} //IF PRP
-    //                 // if (D/3+D%3>X){continue;} //IF DISC
-    //                 if(is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index)){
-    //                     fprintf(fptr,"[%ld,%ld,%ld,%ld]\n",a,b,c,d);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // printf("...done.\n");
-    // fclose(fptr);
-    // free(p);
-    // free(pp);
-    // free(sqfull);
-    // free(list);
-    // return 0;
 }
 

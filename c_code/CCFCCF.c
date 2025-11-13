@@ -359,8 +359,10 @@ int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
 
 //TODO: WRITE DISTRIBUTED VERSION for doing the n1 of n2 loads (break based on c variable?)
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
-    long a,b,c,d,D,f,P,Q,R,check,gcdPR,lowsplit,highsplit;
-    long i=0, X=B*B, tX=3*X, lowsplit=((double)n1-1)/n2, highsplit=((double)n1)/n2;
+    long a,b,c,d,D,f,P,Q,R,check,gcdPR;
+    long i=0, X=B*B, tX=3*X;
+    double lowsplit=((double)n1-1)/n2;
+    double highsplit=((double)n1)/n2;
     if(verbose){printf("Initialising...\n");}
     long* p = primes_up_to(3*B,sqrt(3*B));
     if(verbose){printf("...p initialised\n");}
@@ -389,19 +391,22 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
     if(verbose){printf("Working through b=0 cases...\n");}
     for(a=1;a<=A_bd;a++){
         if(verbose){printf("...a=%ld\n", a);}
-        C_bd=pow(((double)X)/(4*a), 1.0/3);
-        for(c=1; c<=C_bd; c++){
+        C_len=pow(((double)X)/(4*a), 1.0/3);
+        C_lbd=floor(lowsplit*C_len)+1;
+        C_ubd=highsplit*C_len;
+        for(c=C_lbd; c<=C_ubd; c++){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
             P= -3*a*c;
             R= c*c;
+            D= -4*P*R;
             D_lbd=0;
             gcdPR=gcd(P,R);
             if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
-                D= Q*Q-4*Pb*R;
+                D+= Q*Q;
                 if(D<=0){continue;}
-                if(D>tX){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
+                if(D>3*B*gcdPR){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(Q,gcdPR);
                 if(D>3*B*f){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
@@ -416,14 +421,10 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
         B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
         for(b=1; b<=B_bd; b++){ 
             if(verbose){printf("...a=%ld, b=%ld\n", a, b);}
-            C_len=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3)-(1-b);
-            if(lowsplit==0){
-                C_lbd=1;
-            }else{
-                C_lbd=floor(1-b+lowsplit*C_len)+1;
-            }            
-            C_ubd=1-b+highsplit*C_len;
-            for(c=(1-b); c<=C_bd;c++){
+            C_len=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3)+b;
+            C_lbd=floor(lowsplit*C_len-b)+1;
+            C_ubd=highsplit*C_len-b;
+            for(c=C_lbd; c<=C_ubd;c++){
                 P= b*b-3*a*c;
                 D_lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
                 D_ubd = (((double)a+b)*(a+b+c))/a;
@@ -487,12 +488,8 @@ int testing_suite(long a, long b, long c, long d, long B){
 
 
 int main(int argc, char** argv){
-    FILE *fptr=fopen(argv[3], "w");
-    // if(atoi(argv[1])==0){
-    //     CCFCCF(pow(2,atol(argv[2])), fptr, 1);
-    // }else if(atoi(argv[1])==1){
-    //     CCFCCFPRP(pow(2,atol(argv[2])), fptr, 1);
-    // }
+    FILE *fptr=fopen(argv[4], "w");
+    CCFCCFPRP_distributed(pow(2,atol(argv[1])), atol(argv[2]), atol(argv[3]), fptr, 0);
     fclose(fptr);
 }
 

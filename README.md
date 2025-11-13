@@ -8,11 +8,11 @@ Repository for some code to count cubic fields ordered by product of ramified pr
 
 ###c\_code
 *CCFCCF_prp.c*: contains a C implementation of: 
-- _CCFCCF_: Belabas' CCFCCF;
-- _CCFCCFPRP_: (CCFCCF Product of Ramified Primes) Belabas but adapted for product of ramified primes; 
-- _CCFCCFPRP\_distributed_ distributed variant for parallelising computation in CCFCCFPRP.
+- _CCFCCF_: Belabas' CCFCCF.
+- _CCFCCFPRP_: (CCFCCF Product of Ramified Primes) Belabas but adapted for product of ramified primes. 
+- _CCFCCFPRP\_distributed_: distributed variant for parallelising computation in CCFCCFPRP.
 
-uses math libry, so compile with e.g. gcc -Wall CCFCCF.c -lm
+uses math library, so compile with e.g. `gcc -Wall CCFCCF.c -lm`
 
 ## Todo
 - [ ] wrap CCRCCR\_prp.c into a library rather than a .c

@@ -7,7 +7,7 @@ Repository for some code to count cubic fields ordered by product of ramified pr
 - *prototype.mg*: an initial attempt at implementing product of ramified primes in magma, probably full of bugs, decided midway that I was as well just doing it directly in C.
 
 ### c\_code
-*CCFCCF_prp.c*: contains a C implementation of: 
+*CCFCCF.c*: contains a C implementation of: 
 - _CCFCCF_: Belabas' CCFCCF.
 - _CCFCCFPRP_: (CCFCCF Product of Ramified Primes) Belabas but adapted for product of ramified primes. 
 - _CCFCCFPRP\_distributed_: distributed variant for parallelising computation in CCFCCFPRP.

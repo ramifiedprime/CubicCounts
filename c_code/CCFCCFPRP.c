@@ -613,23 +613,24 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
     return 0;
 }
 
-/**
- * @brief main
- * 
- * Example: ./a.out 20 1 2 info.dat
- * 
- * does:
- *  opens file = info.dat
- *  CCFCCFPRP_distributed(2^{20}, 1, 2, file, 0);
- *  closes file 
- * 
- * @param argc
- * @param argv
- * @return 0
- */
-int main(int argc, char** argv){
-    FILE *fptr=fopen(argv[4], "w");
-    CCFCCFPRP_distributed(pow(2,atol(argv[1])), atol(argv[2]), atol(argv[3]), fptr, 0);
-    fclose(fptr);
-    return 0;
-}
+// /**
+//  * @brief main
+//  * 
+//  * Example: ./a.out 20 1 2 info.dat
+//  * 
+//  * does:
+//  *  opens file = info.dat
+//  *  CCFCCFPRP_distributed(2^{20}, 1, 2, file, 0);
+//  *  closes file 
+//  * 
+//  * @param argc
+//  * @param argv
+//  * @return 0
+//  */
+// int main(int argc, char** argv){
+//     FILE *fptr=fopen(argv[4], "w");
+//     CCFCCFPRP_distributed(pow(2,atol(argv[1])), atol(argv[2]), atol(argv[3]), fptr, 0);
+//     fclose(fptr);
+    
+//     return 0;
+// }

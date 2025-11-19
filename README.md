@@ -15,8 +15,8 @@ Repository for some code to count cubic fields ordered by product of ramified pr
 uses math library, so compile with e.g. `gcc -Wall CCFCCF.c -lm`
 
 ## Todo
-- [ ] wrap CCRCCR\_prp.c into a library rather than a .c
-- [ ] comment code carefully
+- [ ] wrap CCFCCF.c into a library rather than a .c
+- [x] comment code carefully
 - [ ] make efficiency edits for product of ramified prime counts
 - [ ] \(optional) fix prototype.mg so that it at least works
 - [ ] \(optional) write CRFCRF version (for real cubics)

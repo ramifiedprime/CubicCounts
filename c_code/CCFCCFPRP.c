@@ -326,29 +326,29 @@ double U(long a, long b){
 int CCFCCF(long X, FILE *fptr, _Bool verbose){
     long a,b,c,d,D,f,P,Q,R;
     long i=0, tX=3*X, B=(long)sqrt(X);
-    if(verbose){printf("Initialising...\n");}
+    if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(X);
-    if(verbose){printf("...p initialised\n");}
+    if(verbose>=2){printf("...p initialised\n");}
     long* pp = (long*)malloc((p[0]+1)*sizeof(long));
     pp[0]=p[0];
     for(i=1; i<=p[0]; i++){
         pp[i]=p[i]*p[i];
     }
-    if(verbose){printf("...pp initialised\n");}
+    if(verbose>=2){printf("...pp initialised\n");}
     long index = init_index_find(p, X, X);
-    if(verbose){printf("...index found\n");}
+    if(verbose>=2){printf("...index found\n");}
     long* sqfull = get_sqfull(pp,sqrt(3*X));
-    if(verbose){printf("...sqfull initialised\n");}
+    if(verbose>=2){printf("...sqfull initialised\n");}
     long* list = get_list(pp, index, X);
-    if(verbose){printf("...list initialised\n");}
-    if(verbose){printf("...done.\n");}
+    if(verbose>=2){printf("...list initialised\n");}
+    if(verbose>=2){printf("...done.\n");}
     // do looping
     double A_bd,B_bd,C_bd,D_ubd;
     long D_lbd;
     A_bd=pow((16.0*X)/27, 1.0/4);
     long quadbd;
     // b=0 looping
-    if(verbose){printf("Working through b=0 cases...\n");}
+    if(verbose>=2){printf("Working through b=0 cases...\n");}
     for(a=1;a<=A_bd;a++){
         C_bd=pow(((double)X)/(4*a), 1.0/3);
         for(c=1; c<=C_bd; c++){
@@ -367,7 +367,7 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\nWorking through b>0 cases...\n");}
+    if(verbose>=2){printf("...done.\nWorking through b>0 cases...\n");}
     for(a=1;a<=A_bd;a++){
         B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
         for(b=1; b<=B_bd; b++){ 
@@ -391,7 +391,7 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\n");}
+    if(verbose>=1){printf("...done.\n");}
     free(p);
     free(pp);
     free(sqfull);
@@ -419,34 +419,34 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
 int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
     long a,b,c,d,D,f,P,Q,R,check;
     long i=0, X=B*B, tX=3*X;
-    if(verbose){printf("Initialising...\n");}
+    if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
-    if(verbose){printf("...p initialised\n");}
+    if(verbose>=2){printf("...p initialised\n");}
     long* pp = (long*)malloc((p[0]+1)*sizeof(long));
     pp[0]=p[0];
     for(i=1; i<=p[0]; i++){
         pp[i]=p[i]*p[i];
     }
-    if(verbose){printf("...pp initialised\n");}
+    if(verbose>=2){printf("...pp initialised\n");}
     long index = init_index_find(p, 3*B, 3*B);
-    if(verbose){printf("...dumping p...");}
+    if(verbose>=2){printf("...dumping p...");}
     free(p);
-    if(verbose){printf("done.\n");}
-    if(verbose){printf("...index found\n");}
+    if(verbose>=2){printf("done.\n");}
+    if(verbose>=2){printf("...index found\n");}
     long* sqfull = get_sqfull(pp,3*B);
-    if(verbose){printf("...sqfull initialised\n");}
+    if(verbose>=2){printf("...sqfull initialised\n");}
     long* list = get_list(pp, index, 3*B);
-    if(verbose){printf("...list initialised\n");}
-    if(verbose){printf("...done.\n");}
+    if(verbose>=2){printf("...list initialised\n");}
+    if(verbose>=2){printf("...done.\n");}
     // do looping
     double A_bd,B_bd,C_bd,D_ubd;
     long D_lbd;
     A_bd=pow((16.0*X)/27, 1.0/4);
     long quadbd;
     // b=0 looping
-    if(verbose){printf("Working through b=0 cases...\n");}
+    if(verbose>=2){printf("Working through b=0 cases...\n");}
     for(a=1;a<=A_bd;a++){
-        if(verbose){printf("...a=%ld\n", a);}
+        if(verbose>=2){printf("...a=%ld\n", a);}
         C_bd=pow(((double)X)/(4*a), 1.0/3);
         for(c=1; c<=C_bd; c++){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
@@ -468,11 +468,11 @@ int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\nWorking through b>0 cases...\n");}
+    if(verbose>=2){printf("...done.\nWorking through b>0 cases...\n");}
     for(a=1;a<=A_bd;a++){
         B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
         for(b=1; b<=B_bd; b++){ 
-            if(verbose){printf("...a=%ld, b=%ld\n", a, b);}
+            if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
             C_bd=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);
             for(c=(1-b); c<=C_bd;c++){
                 P= b*b-3*a*c;
@@ -496,7 +496,7 @@ int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\n");}
+    if(verbose>=1){printf("...done.\n");}
     free(pp);
     free(sqfull);
     free(list);
@@ -523,34 +523,34 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
     long i=0, X=B*B, tX=3*X;
     double lowsplit=((double)n1-1)/n2;
     double highsplit=((double)n1)/n2;
-    if(verbose){printf("Initialising...\n");}
+    if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
-    if(verbose){printf("...p initialised\n");}
+    if(verbose>=2){printf("...p initialised\n");}
     long* pp = (long*)malloc((p[0]+1)*sizeof(long));
     pp[0]=p[0];
     for(i=1; i<=p[0]; i++){
         pp[i]=p[i]*p[i];
     }
-    if(verbose){printf("...pp initialised\n");}
+    if(verbose>=2){printf("...pp initialised\n");}
     long index = init_index_find(p, 3*B, 3*B);
-    if(verbose){printf("...dumping p...");}
+    if(verbose>=2){printf("...dumping p...");}
     free(p);
-    if(verbose){printf("done.\n");}
-    if(verbose){printf("...index found\n");}
+    if(verbose>=2){printf("done.\n");}
+    if(verbose>=2){printf("...index found\n");}
     long* sqfull = get_sqfull(pp,3*B);
-    if(verbose){printf("...sqfull initialised\n");}
+    if(verbose>=2){printf("...sqfull initialised\n");}
     long* list = get_list(pp, index, 3*B);
-    if(verbose){printf("...list initialised\n");}
-    if(verbose){printf("...done.\n");}
+    if(verbose>=2){printf("...list initialised\n");}
+    if(verbose>=2){printf("...done.\n");}
     // do looping
     double A_bd,B_bd,C_ubd,C_len,D_ubd;
     long C_lbd,D_lbd;
     A_bd=pow((16.0*X)/27, 1.0/4);
     long quadbd;
     // b=0 looping
-    if(verbose){printf("Working through b=0 cases...\n");}
+    if(verbose>=2){printf("Working through b=0 cases...\n");}
     for(a=1;a<=A_bd;a++){
-        if(verbose){printf("...a=%ld\n", a);}
+        if(verbose>=2){printf("...a=%ld\n", a);}
         C_len=pow(((double)X)/(4*a), 1.0/3);
         C_lbd=floor(lowsplit*C_len)+1;
         C_ubd=highsplit*C_len;
@@ -576,11 +576,11 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\nWorking through b>0 cases...\n");}
+    if(verbose>=2){printf("...done.\nWorking through b>0 cases...\n");}
     for(a=1;a<=A_bd;a++){
         B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
         for(b=1; b<=B_bd; b++){ 
-            if(verbose){printf("...a=%ld, b=%ld\n", a, b);}
+            if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
             C_len=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3)+b;
             C_lbd=floor(lowsplit*C_len-b)+1;
             C_ubd=highsplit*C_len-b;
@@ -606,31 +606,9 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
             }
         }
     }
-    if(verbose){printf("...done.\n");}
+    if(verbose>=1){printf("...done with run %ld of %ld.\n", n1, n2);}
     free(pp);
     free(sqfull);
     free(list);
     return 0;
 }
-
-// /**
-//  * @brief main
-//  * 
-//  * Example: ./a.out 20 1 2 info.dat
-//  * 
-//  * does:
-//  *  opens file = info.dat
-//  *  CCFCCFPRP_distributed(2^{20}, 1, 2, file, 0);
-//  *  closes file 
-//  * 
-//  * @param argc
-//  * @param argv
-//  * @return 0
-//  */
-// int main(int argc, char** argv){
-//     FILE *fptr=fopen(argv[4], "w");
-//     CCFCCFPRP_distributed(pow(2,atol(argv[1])), atol(argv[2]), atol(argv[3]), fptr, 0);
-//     fclose(fptr);
-    
-//     return 0;
-// }

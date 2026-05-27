@@ -17,7 +17,7 @@
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCF(long X, FILE *fptr, _Bool verbose);
+int CCFCCF(long X, FILE *fptr, int verbose);
 /**
  * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7).
  * 
@@ -35,7 +35,7 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose);
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCFPRP(long B, FILE *fptr, _Bool verbose);
+int CCFCCFPRP(long B, FILE *fptr, int verbose);
 /**
  * @brief distributable version of CCFCCFPRP
  * 
@@ -49,6 +49,6 @@ int CCFCCFPRP(long B, FILE *fptr, _Bool verbose);
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose);
+int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose);
 
 #endif //CCFCCFPRP_H

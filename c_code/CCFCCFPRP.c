@@ -202,12 +202,15 @@ long* get_sqfull(long* pp, long X){
  * Indeed, precisely $K=\mathbb{Q}(sqrt{-ut/3})$
  * 
  * @param t prime-to-6 squarefree part of D
- * @param u Greatest common divisor of D/f^2 and 72.
+ * @param u Greatest common divisor of D/f^2 and 3^3x2^4.
  * @return Associated quadratic discriminant.
  */
 long get_quad_disc(long t, long u){
-    t=t*(u/3);
-    if(u%4==0){
+    t=t*3*u;
+    while(t%9==0){
+        t=t/9;
+    }
+    while(t%4==0){
         t=t/4;
     }
     if(t%4!=3){
@@ -255,7 +258,7 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqr
     if(f>sqfull[0]){printf("Overflow on sqfull: sqfull[0]=%ld, f=%ld\n", sqfull[0],f);}
     if(sqfull[f]){return 0;}
     t = labs(D/(f*f));
-    u = gcd(t,72);
+    u = gcd(t,1296);
     t = t/u;
     if(gcd(t,f)!=1){return 0;}
     if (t<=sqrt3X && sqfull[t]){return 0;} 
@@ -323,7 +326,7 @@ double U(long a, long b){
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCF(long X, FILE *fptr, _Bool verbose){
+int CCFCCF(long X, FILE *fptr, int verbose){
     long a,b,c,d,D,f,P,Q,R;
     long i=0, tX=3*X, B=(long)sqrt(X);
     if(verbose>=2){printf("Initialising...\n");}
@@ -405,10 +408,10 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
  * Implements Belabas' algorithm, but makes cuts for product of ramified primes
  * ordering.  Similar to CCFCCF this prints results to a file.  The printed
  * results take the form of lines:
- *      a,b,c,d,Disc(L),D/f^2\n
+ *      a,b,c,d,Disc(L),D/-3f\n
  * where ax^3+bx^2y+cxy^2+dy^3 is a reduced binary cubic form corresponding 
  * to a complex cubic field, D is the discriminant of the Hessian, f is its content, and L is the
- * associated quadratic resolvent (essentially product of ramified primes, away from 2).  
+ * associated quadratic resolvent.  Note that D/-3f is (away from 2) the product of ramified primes.  
  * This function obtains all such entries with product of ramified primes at most X.
  * 
  * @param B product of ramified primes bound for cubic fields.
@@ -416,7 +419,7 @@ int CCFCCF(long X, FILE *fptr, _Bool verbose){
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
+int CCFCCFPRP(long B, FILE *fptr, int verbose){
     long a,b,c,d,D,f,P,Q,R,check;
     long i=0, X=B*B, tX=3*X;
     if(verbose>=2){printf("Initialising...\n");}
@@ -518,7 +521,7 @@ int CCFCCFPRP(long B, FILE *fptr, _Bool verbose){
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, _Bool verbose){
+int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     long a,b,c,d,D,f,P,Q,R,check,gcdPR;
     long i=0, X=B*B, tX=3*X;
     double lowsplit=((double)n1-1)/n2;

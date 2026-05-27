@@ -418,8 +418,3 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     free(sqfull);
     return 0;
 }
-
-
-int main(void){
-    printf("Hello World");
-}

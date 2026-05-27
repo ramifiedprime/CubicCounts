@@ -228,10 +228,10 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
     __int128 D;
-    long D_cut, D_base,quadbd,; 
-    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_quad_ubd,d_disc_lo,d_disc_hi,d_ubd;
+    long D_cut, D_base,quadbd; 
+    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_disc_lo,d_disc_hi;
     double alpha_d,beta_d,gamma_d;
-    long d_lin_lbd,d_quad_lbd,d_disc_lbd,d_lbd,quad_hi,quad_lo,lo,hi,hi1,lo1;
+    long d_lin_lbd,d_lbd,quad_hi,quad_lo,lo,hi,hi1,lo1;
     if(verbose>=2){printf("...a=%ld, b=0\n", a);}
 
     // b=0 cases
@@ -277,7 +277,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
             beta_d   = 12.0*(double)b*b*b - 54.0*(double)a*b*c;
             gamma_d  = 12.0*(double)a*c*c*c - 3.0*(double)b*b*c*c;
             tempdisc = beta_d*beta_d - 4.0*alpha_d*(gamma_d - (double)tX);
-            if(tmepdisc < 0){ continue; } // D(d)>tX for all d as parabola doesn't meet axis
+            if(tempdisc < 0){ continue; } // D(d)>tX for all d as parabola doesn't meet axis
             temp = sqrt(tempdisc);
             d_disc_hi = (-beta_d + temp) / (2.0*alpha_d);
             d_disc_lo = (-beta_d - temp) / (2.0*alpha_d);
@@ -332,8 +332,8 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     }
                 }
 
-                // upper interval: [max(lo, quad_lo1), hi]
-                long lo1 = (quad_lo > lo) ? quad_lo : lo;
+                // upper interval: [max(lo, quad_lo), hi]
+                lo1 = (quad_lo > lo) ? quad_lo : lo;
                 for(d=lo1; d<=hi; d++){
                     if(d*(d-b) < quadbd){ continue; } //safety net
                     Q = b*c - 9*a*d;

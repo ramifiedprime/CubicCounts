@@ -1,6 +1,8 @@
 # Cubic Counts
 Repository for some code to count cubic fields ordered by product of ramified primes.  Essentially just implementing the algorithm in Belabas' article [1], which counts by discriminant, and modifying in appropriate places to get the required count.  Only interested in complex cubics for now, since that's where my practical interest comes in 
 
+run things at present with the command `gcc -Wall run.c CFCCFPRP.c -lm -o run.exe`
+
 ## Files
 ### magma\_code
 - *CCFCCF.mg*: an implementation of Belabas' CCFCCF in magma, seems to agree with output of pari-gp equivalent so hopefully few bugs.

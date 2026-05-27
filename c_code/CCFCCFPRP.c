@@ -458,13 +458,16 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
             P= -3*a*c;
             R= c*c;
+            Dbase= -4*P*R;
             D_lbd=0;
+            gcdPR=gcd(P,R);
+            D_cut=3*B*gcdPR;
             if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
-                D= Q*Q-4*P*R;
+                D= Q*Q+Dbase;
                 if(D<=0){continue;}
-                if(D>tX){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
+                if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(P,gcd(Q,R));
                 if(D>3*B*f){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
@@ -564,15 +567,16 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
             P= -3*a*c;
             R= c*c;
-            D= -4*P*R;
+            Dbase= -4*P*R;
             D_lbd=0;
             gcdPR=gcd(P,R);
+            D_cut=3*B*gcdPR;
             if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
-                D+= Q*Q;
+                D= Dbase + Q*Q;
                 if(D<=0){continue;}
-                if(D>3*B*gcdPR){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
+                if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(Q,gcdPR);
                 if(D>3*B*f){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);

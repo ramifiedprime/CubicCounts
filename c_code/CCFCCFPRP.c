@@ -372,7 +372,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
  * @return 0
  */
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
-    int i=0;
+    long i=0;
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
     if(verbose>=2){printf("...p initialised\n");}
@@ -418,7 +418,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  */
 
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
-    int i=0;
+    long i=0;
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
     if(verbose>=2){printf("...p initialised\n");}

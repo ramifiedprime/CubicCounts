@@ -73,41 +73,6 @@ long* primes_up_to(long X){
     return primes; //first entry is number of primes, rest are primes
 }
 
-/**
- * @brief gets the value of `list` from sub-algorithm 5.1 (`init`)
- * 
- * gets ordered list of all integers up to X which are divisible 
- * by pp[i] for some i>=index.  This returns `list` as required for `init`
- * 
- * @param pp squares of primes up to X
- * @param index integer cut-off for memory constraint
- * @param X integer bound for list
- * @return list of all integers up to X which are divisible by 
- * a prime square after the index-th one
- */
-long* get_list(long* pp, long index, long X){
-    long i,k,x,num=0;
-    _Bool* blist = (_Bool*)calloc(X+2, sizeof(_Bool));
-    for(i=index; i<=pp[0]; i++){
-        for(x=pp[i]; x<X; x+=pp[i]){
-            if(!blist[x]){num++; blist[x]=1;}
-        }
-    }
-    // printf("\tsuccessfully passed blist construction\n");
-    long* list = (long*)calloc(num+2, sizeof(long));
-    i=1;
-    for(x=6; x<=X+1; x+=6){
-        for(k=-1;k<=1 && x+k<=X;k+=2){
-            if(blist[x+k]){list[i]=x+k;i++;}
-        }
-    }
-    list[0]=i-1;
-    // printf("\tsuccessfully passed list construction\n");
-    free(blist);
-    return list;
-}
-
-
 
 /**
  * @brief Gets array `sqfull` from sub-algorithm 5.1 (`init`) 
@@ -181,11 +146,10 @@ long get_quad_disc(long t, long u){
  * @param d Fourth coefficient of cubic form.
  * @param D Discriminant of Hessian(a,b,c,d).
  * @param f Content of Hessian(a,b,c,d).
- * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6. 
- * @param sqrtX square root of X.
+ * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6.
  * @return quadratic disriminant of the associated field, or 0 if it fails to correspond.
  */
-long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqrtX){
+long test(long a, long b, long c, long d, long D, long f, long* sqfull){
     long a9,d9,t,u;
     if ((D%27)==0 && (f%3!=0)){return 0;} // Not in V3 and not (1^3)
     else if(f%3==0){// checking if in U3 given that it's 1^3
@@ -222,14 +186,14 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqr
  * @param f Content of Hessian(a,b,c,d).
  * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6. 
  * @param sqrtX square root of X.
- * @return test(a,b,c,d,D,f,sqfull,sqrtX).
+ * @return test(a,b,c,d,D,f,sqfull).
  */
-long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull, long sqrtX){
+long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull){
         if((D <= 0) || (D%16==0) || (D%16==4 && (P%2!=0 || R%2!=0))){
             return 0;
         }
         // printf("\tpassed U2 check, now running test\n");
-        return test(a,b,c,d,D,f,sqfull,sqrtX);
+        return test(a,b,c,d,D,f,sqfull);
 }
 
 /**
@@ -262,7 +226,8 @@ double U(long a, long b){
  * @return 0
  */
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
-    long a,b,c,d,D,f,P,Q,R,check,Dbase,gcdPR,D_cut;
+    long a,b,c,d,D,f,P,Q,R,check,Dbase,gcdPR;
+    __int128 D_cut;
     long i=0, X=54*B*B, tX=3*X; // 54 is to account for wild ramification at 2 and 3
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
@@ -304,7 +269,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(gcdPR, Q);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B);
+                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
                 }
@@ -331,7 +296,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B);
+                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull);
                     if(check){
                     fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
                     }
@@ -407,7 +372,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(Q,gcdPR);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B);
+                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
                 }
@@ -436,7 +401,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B);
+                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull);
                     if(check){
                     fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
                     }
@@ -448,4 +413,9 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     free(pp);
     free(sqfull);
     return 0;
+}
+
+
+int main(void){
+    printf("Hello World");
 }

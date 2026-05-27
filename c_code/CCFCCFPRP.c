@@ -184,8 +184,7 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull){
  * @param R Third coefficient of Hessian.
  * @param D Discriminant of Hessian(a,b,c,d).
  * @param f Content of Hessian(a,b,c,d).
- * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6. 
- * @param sqrtX square root of X.
+ * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6.
  * @return test(a,b,c,d,D,f,sqfull).
  */
 long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull){
@@ -226,9 +225,12 @@ double U(long a, long b){
  * @return 0
  */
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
-    long a,b,c,d,D,f,P,Q,R,check,Dbase,gcdPR;
-    __int128 D_cut;
-    long i=0, X=54*B*B, tX=3*X; // 54 is to account for wild ramification at 2 and 3
+    long a,b,c,d,f,P,Q,R,check,gcdPR;
+    long i=0;
+    // 54 is to account for wild ramification at 2 and 3
+    // int128 is to account for B around 30 bits
+    __int128 D;
+    long D_cut, D_base, X=54*B*B, tX=3*X; 
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
     if(verbose>=2){printf("...p initialised\n");}
@@ -258,20 +260,20 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
             P= -3*a*c;
             R= c*c;
-            Dbase= -4*P*R;
+            D_base= -4*P*R;
             D_lbd=0;
             gcdPR=gcd(P,R);
             D_cut=3*B*gcdPR;
             if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
-                D= Q*Q+Dbase;
+                D= (__int128)Q*Q+(__int128)D_base;
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(gcdPR, Q);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull);
+                check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
-                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
+                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(-3*f));
                 }
             }
         }
@@ -292,13 +294,13 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                     if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
                     Q= b*c-9*a*d;
                     R= c*c-3*b*d;
-                    D= Q*Q-4*P*R;
+                    D= (__int128)Q*Q-(__int128)4*P*R;
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull);
+                    check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
+                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(-3*f));
                     }
                 }
             }
@@ -326,8 +328,10 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  * @return 0
  */
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
-    long a,b,c,d,D,f,P,Q,R,check,gcdPR,Dbase,D_cut;
-    long i=0, X=54*B*B, tX=3*X;
+    long a,b,c,d,f,P,Q,R,check,gcdPR;
+    long i=0;
+    __int128 D;
+    long D_cut, D_base, X=54*B*B, tX=3*X;
     double lowsplit=((double)n1-1)/n2;
     double highsplit=((double)n1)/n2;
     if(verbose>=2){printf("Initialising...\n");}
@@ -361,20 +365,20 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
             // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
             P= -3*a*c;
             R= c*c;
-            Dbase= -4*P*R;
+            D_base= -4*P*R;
             D_lbd=0;
             gcdPR=gcd(P,R);
             D_cut=3*B*gcdPR;
             if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
-                D= Dbase + Q*Q;
+                D= (__int128)D_base + (__int128)Q*Q;
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(Q,gcdPR);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull);
+                check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
-                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
+                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(-3*f));
                 }
             }
         }
@@ -397,13 +401,13 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                     if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
                     Q= b*c-9*a*d;
                     R= c*c-3*b*d;
-                    D= Q*Q-4*P*R;
+                    D= (__int128)Q*Q-(__int128)4*P*R;
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull);
+                    check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
+                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(-3*f));
                     }
                 }
             }

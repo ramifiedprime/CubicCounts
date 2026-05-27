@@ -144,7 +144,7 @@ long* get_sqfull(long* pp, long X){
  * Indeed, precisely $K=\mathbb{Q}(sqrt{-ut/3})$
  * 
  * @param t prime-to-6 squarefree part of D
- * @param u Greatest common divisor of D/f^2 and 3^3x2^4.
+ * @param u Greatest common divisor of D/f^2 and 3^5x2^4.
  * @return Associated quadratic discriminant.
  */
 long get_quad_disc(long t, long u){
@@ -199,7 +199,7 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqr
     if(f>sqfull[0]){printf("Overflow on sqfull: sqfull[0]=%ld, f=%ld\n", sqfull[0],f);}
     if(sqfull[f]){return 0;}
     t = labs(D/(f*f));
-    u = gcd(t,1296);
+    u = gcd(t,3888);
     t = t/u;
     if(gcd(t,f)!=1){return 0;}
     if (sqfull[t]){return 0;}
@@ -362,7 +362,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  */
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     long a,b,c,d,D,f,P,Q,R,check,gcdPR,Dbase,D_cut;
-    long i=0, X=B*B, tX=3*X;
+    long i=0, X=54*B*B, tX=3*X;
     double lowsplit=((double)n1-1)/n2;
     double highsplit=((double)n1)/n2;
     if(verbose>=2){printf("Initialising...\n");}

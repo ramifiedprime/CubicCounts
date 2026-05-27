@@ -1,6 +1,6 @@
 /**
  * @file CCFCCF.c
- * @brief Computes cubic fields with bounded product of ramified primes.
+ * @brief Finds all cubic fields with bounded product of ramified primes.
  *
  * @details Implementation of Belabas' algorithm in the article _a fast algorithm to compute cubic fields_
  * with some minor modifications to count according to product of ramified primes.  Any references to 
@@ -33,10 +33,10 @@ long gcd(long a, long b){
  * 
  * Implements binary search to test membership in an ordered list.
  * @param x potential member of list.
- * @param list ordered list of integers.
+ * @param list ordered list of integers, zeroth entry is the final index (so list[list[0]] is the final set entry).  Must be non-null.
  * @return boolean test of membership for whether x is in list.
  */
-_Bool member(long x, long* list){
+_Bool member(long x, const long* list){
     long n = list[0];
     long lo = 1, hi = n;
     while (lo <= hi) {
@@ -60,6 +60,9 @@ _Bool member(long x, long* list){
 long* primes_up_to(long X){
     // printf("Initialising p...\n");
     long sqrtX = sqrt(X);
+    //Precision error in sqrt capture:
+    while (sqrtX * sqrtX > X) sqrtX--;      // round up correction
+    while ((sqrtX+1) * (sqrtX+1) <= X) sqrtX++;  // round down correction
     _Bool* comp = (_Bool*)calloc(X+1, sizeof(_Bool));//comp[n]=true iff n composite
     long i,j;
     long pi=0;
@@ -67,7 +70,7 @@ long* primes_up_to(long X){
         if(!comp[i]){
             pi++;
             if(i<=sqrtX){
-                for(j=2; j<= X/i; j++){
+                for(j=i; j<= X/i; j++){
                     comp[i*j] = 1;
                 }
             }

@@ -494,7 +494,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
+                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
                     if(check){
                     fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
                     }

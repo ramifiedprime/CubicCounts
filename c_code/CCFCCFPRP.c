@@ -228,9 +228,10 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
     __int128 D;
-    long D_cut, D_base; 
-    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_quad_ubd,d_disc_ubd,d_ubd;
-    long d_lin_lbd,d_quad_lbd,d_disc_lbd,d_lbd;
+    long D_cut, D_base,quadbd,; 
+    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_quad_ubd,d_disc_lo,d_disc_hi,d_ubd;
+    double alpha_d,beta_d,gamma_d;
+    long d_lin_lbd,d_quad_lbd,d_disc_lbd,d_lbd,quad_hi,quad_lo,lo,hi,hi1,lo1;
     if(verbose>=2){printf("...a=%ld, b=0\n", a);}
 
     // b=0 cases
@@ -262,34 +263,89 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
     for(b=1; b<=B_bd; b++){
         if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
         C_bd=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);
-        for(c=(1-b); c<=C_bd;c++){
-            P= b*b-3*a*c;
-            d_lin_lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
+        for(c=(1-b); c<=C_bd; c++){
+            P = b*b - 3*a*c;
+
+            // lemma 4.2 linear bounds
+            d_lin_lbd = (long)floor(-(((double)a-b)*(a-b+c))/a);
             d_lin_ubd = (((double)a+b)*(a+b+c))/a;
-            
-            tempdisc = (double)b*b+4*a*(a-c);
-            if(tempdisc < 0){continue}
-            temp=sqrt(tempisc)
-            d_quad_ubd = (b+temp)/2.0;
-            d_quad_lbd = (long)floor(d_quad_ubd-temp);
 
-            d_disc_ubd = (12*b*b*b-54*a*b*c);
-            temp = sqrt(d_quad_ubd*d_disc_ubd-324*a*a*(12*a*c*c*c-3*b*b*c*c-tX));
-            d_disc_ubd = (54*a*b*c-12*b*b*b+temp)/(162*a*a);
-            d_disc_lbd = (long)floor(d_disc_ubd - (temp/81*a*a));
+            // disc(d) = alpha*d^2 + beta*d + gamma <= tX
+            // where alpha=81a^2, beta=12b^3-54abc, gamma=12ac^3-3b^2c^2.
+            // disc(d) <= tX for d in [d_disc_lo, d_disc_hi]
+            alpha_d  = 81.0*(double)a*a;
+            beta_d   = 12.0*(double)b*b*b - 54.0*(double)a*b*c;
+            gamma_d  = 12.0*(double)a*c*c*c - 3.0*(double)b*b*c*c;
+            tempdisc = beta_d*beta_d - 4.0*alpha_d*(gamma_d - (double)tX);
+            if(tmepdisc < 0){ continue; } // D(d)>tX for all d as parabola doesn't meet axis
+            temp = sqrt(tempdisc);
+            d_disc_hi = (-beta_d + temp) / (2.0*alpha_d);
+            d_disc_lo = (-beta_d - temp) / (2.0*alpha_d);
 
-            d_ubd=fmin(fmin(d_quad_ubd,d_lin_ubd),d_disc_ubd);
-            d_lbd=lmax(lmax(d_quad_lbd,d_lin_lbd),d_disc_lbd);
-            for(d=d_lbd+1; d<d_ubd; d++){
-                Q= b*c-9*a*d;
-                R= c*c-3*b*d;
-                D= (__int128)Q*Q-(__int128)4*P*R;
-                if(D<=0){continue;} // IF DISC
-                f=gcd(P,gcd(Q,R));
-                if(D>3*B*f){continue;} //IF PRP
-                check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
-                if(check){
-                fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+            // intersect linear and discriminant bounds
+            lo = lmax((long)ceil(d_disc_lo) - 1, d_lin_lbd + 1);
+            hi = (long)fmin(floor(d_disc_hi) + 1.0, floor(d_lin_ubd - 1e-9));
+            if(lo > hi){ continue; }
+
+            // Quadratic condition: d^2 - b*d - a*(a-c) >= 0
+            // holds outwith the roots:
+            //   d <= root_lo  OR  d >= root_hi
+            // where root_lo/hi = (b -/+ sqrt(b^2+4a(a-c)))/2.
+            // If form_disc = b^2+4a(a-c) < 0: no real roots, quadratic always positive,
+            // condition always satisfied — single interval [lo, hi].
+            // If form_disc >= 0: two valid sub-intervals, run two separate loops. --- */
+            quadbd = a*(a-c);
+            tempdisc = (double)b*b + 4.0*(double)quadbd;
+
+            if(tempdisc < 0){
+                // quadratic condition trivial: d is in [lo, hi]
+                for(d=lo; d<=hi; d++){
+                    Q = b*c - 9*a*d;
+                    R = c*c - 3*b*d;
+                    D = (__int128)Q*Q - (__int128)4*P*R;
+                    if(D <= 0 || D > tX){ continue; } /* safety net */
+                    f = gcd(P, gcd(Q,R));
+                    if(D > 3*B*f){ continue; }
+                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    if(check){
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                    }
+                }
+            } else {
+                // quadratic condition is nontrivial
+                temp   = sqrt(tempdisc);
+                quad_hi = (long)floor((b - temp) / 2.0);
+                quad_lo = (long)ceil((b + temp) / 2.0);
+                // lower interval: [lo, min(hi, quad_hi1)]
+                hi1 = (quad_hi < hi) ? quad_hi : hi;
+                for(d=lo; d<=hi1; d++){
+                    if(d*(d-b) < quadbd){ continue; } // safety
+                    Q = b*c - 9*a*d;
+                    R = c*c - 3*b*d;
+                    D = (__int128)Q*Q - (__int128)4*P*R;
+                    if(D <= 0 || D > tX){ continue; } // safety
+                    f = gcd(P, gcd(Q,R));
+                    if(D > 3*B*f){ continue; }
+                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    if(check){
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                    }
+                }
+
+                // upper interval: [max(lo, quad_lo1), hi]
+                long lo1 = (quad_lo > lo) ? quad_lo : lo;
+                for(d=lo1; d<=hi; d++){
+                    if(d*(d-b) < quadbd){ continue; } //safety net
+                    Q = b*c - 9*a*d;
+                    R = c*c - 3*b*d;
+                    D = (__int128)Q*Q - (__int128)4*P*R;
+                    if(D <= 0 || D > tX){ continue; } // safety net
+                    f = gcd(P, gcd(Q,R));
+                    if(D > 3*B*f){ continue; }
+                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    if(check){
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                    }
                 }
             }
         }

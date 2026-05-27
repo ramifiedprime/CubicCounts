@@ -29,25 +29,6 @@ long gcd(long a, long b){
 }
 
 /**
- * @brief Membership test for ordered list.
- * 
- * Implements binary search to test membership in an ordered list.
- * @param x potential member of list.
- * @param list ordered list of integers, zeroth entry is the final index (so list[list[0]] is the final set entry).  Must be non-null.
- * @return boolean test of membership for whether x is in list.
- */
-_Bool member(long x, const long* list){
-    long n = list[0];
-    long lo = 1, hi = n;
-    while (lo <= hi) {
-        long mid = lo + (hi - lo) / 2;
-        if (list[mid] == x) return 1;
-        if (list[mid] < x) lo = mid + 1;
-        else hi = mid - 1;
-    }
-    return 0;
-}
-/**
  * @brief Obtains all primes up to a bound 
  * 
  * Implements Erastosthenes sieve, no cleverness applied, to return all primes
@@ -90,48 +71,6 @@ long* primes_up_to(long X){
     free(comp);
     // printf("...done")
     return primes; //first entry is number of primes, rest are primes
-}
-
-
-/**
- * @brief Gets the value of `index` from sub-algorithm 5.1 (`init`) .
- * 
- * Obtains the index used to balance memory and work in `CCFCCF`, see sub-algorithm 5.1 (`init`) 
- * in Belabas' paper.
- * 
- * @param p array of primes.
- * @param X the bound for p.
- * @param M number of longs to be stored in memory.
- * @return `index` as required for `init`
- */
-long init_index_find(long* p, long X, long M){
-    long r[2] = {1,p[0]};
-    long i = (r[0]+r[1]+1)/2;
-    long tM = 3*M;
-    double num=1;
-    while(i!=r[1]){
-        num = X/(p[i]*log(p[i]))*(1+(1.0/(2*log(p[i]))));
-        if(num <= tM){
-            r[1]=i;
-        }else{
-            r[0]=i;
-        }
-        i = (r[0]+r[1]+1)/2;
-    }
-    if(num > tM){
-        printf("Error: Memory constraint too small for bound.\n");
-        exit(1);
-    }//At this stage we've completed the first pass
-    if(p[i]<=53){
-        double J=0;
-        double JJ=(((double)tM)/X - (1/log(59))*(1+(1/(2*log(59)))));
-        i = 16;
-        while(J<=JJ && i>3){
-            J+=1.0/(p[i]*p[i]);
-            i--;
-        }
-    }
-    return i;
 }
 
 /**
@@ -225,7 +164,10 @@ long get_quad_disc(long t, long u){
 
 
 /**
- * @brief tests whether a reduced cubic form corresponds to a field, implements `test` (sub-algorithm 5.2).
+ * @brief tests whether a reduced cubic form corresponds to a field, implements `test` (sub-algorithm 5.2) with a modification for working in the product of ramified primes setting:  
+ *  We call get_sqfull(pp,3*B), so that the range of the squarefull numbers in sqfull is up to 3B. Our input t will satisfy
+ *     t=D/(f^2u)<=D/f^2<=3Bf/f^2<= 3B,
+ * we can always just do the lookup in the sqfull table.
  * 
  * Assumes that the input is in U_2 already (i.e. satisfies 2-adic constraint)
  * Tests belonging to U_3 by congruences, then checks minmality at other primes
@@ -241,14 +183,10 @@ long get_quad_disc(long t, long u){
  * @param f Content of Hessian(a,b,c,d).
  * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6. 
  * @param sqrtX square root of X.
- * @param list list of all integers up to X which are divisible by some prime square after the index-th one.
- * @param pp squares of primes up to X.
- * @param index memory bound index.
  * @return quadratic disriminant of the associated field, or 0 if it fails to correspond.
  */
-long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqrtX, long* list, long* pp, long index){
-    long a9,d9,t,i,u;
-    double sqrt3X=floor(1.7320508075688772*sqrtX);
+long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqrtX){
+    long a9,d9,t,u;
     if ((D%27)==0 && (f%3!=0)){return 0;} // Not in V3 and not (1^3)
     else if(f%3==0){// checking if in U3 given that it's 1^3
         a9 = a%9;
@@ -264,13 +202,7 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqr
     u = gcd(t,1296);
     t = t/u;
     if(gcd(t,f)!=1){return 0;}
-    if (t<=sqrt3X && sqfull[t]){return 0;} 
-    else if(member(t,list)){return 0;}
-    else{
-        for(i=2;i<=index-1;i++){
-            if(t%pp[i]==0){return 0;}
-        }
-    }
+    if (sqfull[t]){return 0;}
     return get_quad_disc(t, u);
 }
 
@@ -290,17 +222,14 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull, long sqr
  * @param f Content of Hessian(a,b,c,d).
  * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6. 
  * @param sqrtX square root of X.
- * @param list list of all integers up to X which are divisible by some prime square after the index-th one.
- * @param pp squares of primes up to X.
- * @param index memory bound index.
- * @return test(a,b,c,d,D,f,sqfull,sqrtX,list,pp,index).
+ * @return test(a,b,c,d,D,f,sqfull,sqrtX).
  */
-long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull, long sqrtX, long* list, long* pp, long index){
+long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull, long sqrtX){
         if((D <= 0) || (D%16==0) || (D%16==4 && (P%2!=0 || R%2!=0))){
             return 0;
         }
         // printf("\tpassed U2 check, now running test\n");
-        return test(a,b,c,d,D,f,sqfull,sqrtX,list,pp,index);
+        return test(a,b,c,d,D,f,sqfull,sqrtX);
 }
 
 /**
@@ -333,8 +262,8 @@ double U(long a, long b){
  * @return 0
  */
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
-    long a,b,c,d,D,f,P,Q,R,check;
-    long i=0, X=B*B, tX=3*X;
+    long a,b,c,d,D,f,P,Q,R,check,Dbase,gcdPR,D_cut;
+    long i=0, X=54*B*B, tX=3*X; // 54 is to account for wild ramification at 2 and 3
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);
     if(verbose>=2){printf("...p initialised\n");}
@@ -344,15 +273,11 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
         pp[i]=p[i]*p[i];
     }
     if(verbose>=2){printf("...pp initialised\n");}
-    long index = init_index_find(p, 3*B, 3*B);
     if(verbose>=2){printf("...dumping p...");}
     free(p);
     if(verbose>=2){printf("done.\n");}
-    if(verbose>=2){printf("...index found\n");}
     long* sqfull = get_sqfull(pp,3*B);
     if(verbose>=2){printf("...sqfull initialised\n");}
-    long* list = get_list(pp, index, 3*B);
-    if(verbose>=2){printf("...list initialised\n");}
     if(verbose>=2){printf("...done.\n");}
     // do looping
     double A_bd,B_bd,C_bd,D_ubd;
@@ -376,11 +301,10 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
                 D= Q*Q+Dbase;
-                if(D<=0){continue;}
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
-                f=gcd(P,gcd(Q,R));
+                f=gcd(gcdPR, Q);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
+                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
                 }
@@ -407,7 +331,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
+                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B);
                     if(check){
                     fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
                     }
@@ -418,7 +342,6 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
     if(verbose>=1){printf("...done.\n");}
     free(pp);
     free(sqfull);
-    free(list);
     return 0;
 }
 
@@ -438,7 +361,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  * @return 0
  */
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
-    long a,b,c,d,D,f,P,Q,R,check,gcdPR;
+    long a,b,c,d,D,f,P,Q,R,check,gcdPR,Dbase,D_cut;
     long i=0, X=B*B, tX=3*X;
     double lowsplit=((double)n1-1)/n2;
     double highsplit=((double)n1)/n2;
@@ -451,15 +374,11 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
         pp[i]=p[i]*p[i];
     }
     if(verbose>=2){printf("...pp initialised\n");}
-    long index = init_index_find(p, 3*B, 3*B);
     if(verbose>=2){printf("...dumping p...");}
     free(p);
     if(verbose>=2){printf("done.\n");}
-    if(verbose>=2){printf("...index found\n");}
     long* sqfull = get_sqfull(pp,3*B);
     if(verbose>=2){printf("...sqfull initialised\n");}
-    long* list = get_list(pp, index, 3*B);
-    if(verbose>=2){printf("...list initialised\n");}
     if(verbose>=2){printf("...done.\n");}
     // do looping
     double A_bd,B_bd,C_ubd,C_len,D_ubd;
@@ -485,11 +404,10 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
             for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;
                 D= Dbase + Q*Q;
-                if(D<=0){continue;}
                 if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(Q,gcdPR);
                 if(D>3*B*f){continue;} // IF PRP
-                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
+                check=is_complex_field(a,0,c,d,P,Q,R,D,f,sqfull,B);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,D/(-3*f));
                 }
@@ -518,7 +436,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                     if(D>tX || D<=0){continue;} // IF DISC
                     f=gcd(P,gcd(Q,R));
                     if(D>3*B*f){continue;} //IF PRP
-                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B,list,pp,index);
+                    check=is_complex_field(a,b,c,d,P,Q,R,D,f,sqfull,B);
                     if(check){
                     fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,D/(-3*f));
                     }
@@ -529,6 +447,5 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     if(verbose>=1){printf("...done with run %ld of %ld.\n", n1, n2);}
     free(pp);
     free(sqfull);
-    free(list);
     return 0;
 }

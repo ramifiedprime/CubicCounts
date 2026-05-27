@@ -211,9 +211,8 @@ double U(long a, long b){
  * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7).
  * 
  * Implements Belabas' algorithm, but makes cuts for product of ramified primes
- * ordering.  Similar to CCFCCF this prints results to a file.  The printed
- * results take the form of lines:
- *      a,b,c,d,Disc(L),D/-3f\n
+ * ordering.  The results are printed to a file, where results take the form of rows:
+ *      a,b,c,d,|Disc(L)|,D/-3f\n
  * where ax^3+bx^2y+cxy^2+dy^3 is a reduced binary cubic form corresponding 
  * to a complex cubic field, D is the discriminant of the Hessian, f is its content, and L is the
  * associated quadratic resolvent.  Note that D/-3f is (away from 2) the product of ramified primes.  
@@ -273,7 +272,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                 if(D>3*B*f){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
-                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(-3*f));
+                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(3*f)); // output is a,b,c,d,quadratic
                 }
             }
         }
@@ -300,7 +299,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
                     if(D>3*B*f){continue;} //IF PRP
                     check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(-3*f));
+                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
                     }
                 }
             }
@@ -378,7 +377,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                 if(D>3*B*f){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
-                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(-3*f));
+                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(3*f));
                 }
             }
         }
@@ -398,7 +397,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                 quadbd = a*(a-c);
                 // printf("a=%ld, b=%ld, c=%ld, %ld<=d<=%lf\n", a, b, c, D_lbd, D_ubd);
                 for(d=D_lbd+1; d<D_ubd; d++){
-                    if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
+                    if(d*(d-b) < quadbd){continue;}// Improvement poss here, inc function
                     Q= b*c-9*a*d;
                     R= c*c-3*b*d;
                     D= (__int128)Q*Q-(__int128)4*P*R;
@@ -407,7 +406,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
                     if(D>3*B*f){continue;} //IF PRP
                     check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(-3*f));
+                    fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
                     }
                 }
             }

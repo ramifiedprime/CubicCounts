@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+static inline long lmax(long a, long b){ return a > b ? a : b; }
 /**
  * @brief Greatest common divisor of two integers.
  * 
@@ -229,8 +229,8 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
     // int128 is to account for B around 30 bits
     __int128 D;
     long D_cut, D_base; 
-    double B_bd,C_bd,D_ubd;
-    long D_lbd,quadbd;
+    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_quad_ubd,d_disc_ubd,d_ubd;
+    long d_lin_lbd,d_quad_lbd,d_disc_lbd,d_lbd;
     if(verbose>=2){printf("...a=%ld, b=0\n", a);}
 
     // b=0 cases
@@ -240,11 +240,11 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
         P= -3*a*c;
         R= c*c;
         D_base= -4*P*R;
-        D_lbd=0;
+        d_lbd=0;
         gcdPR=gcd(P,R);
         D_cut=3*B*gcdPR;
-        if(c<=a){D_lbd = (long)floor(sqrt(a*(a-c)));}
-        for(d=D_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
+        if(c<=a){d_lbd = (long)floor(sqrt(a*(a-c)));}
+        for(d=d_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
             Q= -9*a*d;
             D= (__int128)Q*Q+(__int128)D_base;
             if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
@@ -259,20 +259,32 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
 
     //b>0 cases
     B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
-    for(b=1; b<=B_bd; b++){ 
+    for(b=1; b<=B_bd; b++){
         if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
         C_bd=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);
         for(c=(1-b); c<=C_bd;c++){
             P= b*b-3*a*c;
-            D_lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
-            D_ubd = (((double)a+b)*(a+b+c))/a;
-            quadbd = a*(a-c);
-            for(d=D_lbd+1; d<D_ubd; d++){
-                if(d*(d-b) < quadbd){continue;}//Improvement poss here, inc function
+            d_lin_lbd =(long)floor(-(((double)a-b)*(a-b+c))/a);
+            d_lin_ubd = (((double)a+b)*(a+b+c))/a;
+            
+            tempdisc = (double)b*b+4*a*(a-c);
+            if(tempdisc < 0){continue}
+            temp=sqrt(tempisc)
+            d_quad_ubd = (b+temp)/2.0;
+            d_quad_lbd = (long)floor(d_quad_ubd-temp);
+
+            d_disc_ubd = (12*b*b*b-54*a*b*c);
+            temp = sqrt(d_quad_ubd*d_disc_ubd-324*a*a*(12*a*c*c*c-3*b*b*c*c-tX));
+            d_disc_ubd = (54*a*b*c-12*b*b*b+temp)/(162*a*a);
+            d_disc_lbd = (long)floor(d_disc_ubd - (temp/81*a*a));
+
+            d_ubd=fmin(fmin(d_quad_ubd,d_lin_ubd),d_disc_ubd);
+            d_lbd=lmax(lmax(d_quad_lbd,d_lin_lbd),d_disc_lbd);
+            for(d=d_lbd+1; d<d_ubd; d++){
                 Q= b*c-9*a*d;
                 R= c*c-3*b*d;
                 D= (__int128)Q*Q-(__int128)4*P*R;
-                if(D>tX || D<=0){continue;} // IF DISC
+                if(D<=0){continue;} // IF DISC
                 f=gcd(P,gcd(Q,R));
                 if(D>3*B*f){continue;} //IF PRP
                 check=is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
@@ -349,7 +361,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  * @return 0
  */
 
-int CCFCCFPRP_distributed(long B, int n1, int n2, int FILE *fptr, int verbose){
+int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     int i=0;
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);

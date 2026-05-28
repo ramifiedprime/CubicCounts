@@ -407,8 +407,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  * @brief distributable version of CCFCCFPRP
  * 
  * Implements a sub-search of CCFCCF(B, *fptr, verbose), useful to allow running many searches in parallel.
- * Parallelisation is on pairs (a,b), with a round-robin approach so that we are essentially 
- * working with 1 in n2 many of the pairs (a,b).  n1 then chooses which of those 1/n2 we do.
+ * Parallelisation is on a, with a round-robin approach so that we are fixing a mod n2 to be n1 many.
  * 
  * @param B product of ramified primes bound for cubic fields.
  * @param n1 integer between 1 and n2

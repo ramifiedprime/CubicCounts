@@ -1,5 +1,5 @@
 /**
- * @file CCFCCF.c
+ * @file CCFCCFPRP.c
  * @brief Finds all cubic fields with bounded product of ramified primes.
  *
  * @details Implementation of Belabas' algorithm in the article _a fast algorithm to compute cubic fields_

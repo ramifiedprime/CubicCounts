@@ -16,8 +16,8 @@
  * 
  * Distributed usage:
  * @code
- *   ./main.exe <B> <outfile>
- *   ./main.exe <exponent> <n1> <n2> <outfile>
+ *   ./main.exe <B> <n1> <n2> <outfile>
+ *   ./main.exe -b <exponent> <n1> <n2> <outfile>
  * @endcode
  * e.g. ./main.exe 25 3 100 output.dat
  * runs CCFCCFPRP_distributed with B=2^exponent, writes to outfile.
@@ -30,35 +30,39 @@
 
 /**
  * @brief main runs CCFCCFPRP in standard or distributed mode.
-
- * Useage is one of the two types below:
- * @code
- *   ./main.exe <exponent> <outfile>
- *   ./main.exe <exponent> <n1> <n2> <outfile>
- * @endcode
  * 
- * @param exponent the bound for the number of bits of the product of ramified primes, i.e. B=2^exponent for CCFCCFPRP.
- * @param n1 integer between 1 and n2
- * @param n2 integer
- * @param outfile name of output file.
  * @return 0
  */
+long get_B(int bits_flag, char* input){
+    if(bits_flag){return (long)pow(2,atol(input));}
+    else{return atol(input);}
+}
+
 int main(int argc, char** argv){
-    if(argc == 3){ // standard mode
-        FILE *fptr=fopen(argv[2], "w");
-        long exponent = atol(argv[1]);
-        printf("CCFCCFPRP: B=2^%ld writing to %s\n", exponent, argv[2]);
-        CCFCCFPRP(pow(2,exponent), fptr, 0);
+    int bits_flag = 0;
+    int opt;
+    while((opt = getopt(argc, argv, "b")) != -1){
+        if(opt == 'b'){bits_flag=1;}
+        else{fprintf(stderr, "Error: unknown flag.\nUsage: %s [-b] <B_or_exponent> <n1> <n2> <outfile>\n", argv[0]); return 1;}
+    }
+    int n_inputs = argc-optind;
+    if(n_inputs == 2){// standard mode
+        if(bits_flag){printf("CCFCCFPRP: B=2^%s writing to %s\n", argv[optind], argv[optind+1]);}
+        else{printf("CCFCCFPRP: B=%s writing to %s\n", argv[optind], argv[optind+1]);}
+        FILE *fptr=fopen(argv[optind+1], "w");
+        if(!fptr){fprintf(stderr, "Error: could not open %s\n", argv[optind+1]); return 1;}
+        CCFCCFPRP(get_B(bits_flag, argv[optind]), fptr, 0);
         fclose(fptr);
     }
-    else if(argc == 5){// distributed mode
-        FILE *fptr=fopen(argv[4], "w");
-        long exponent = atol(argv[1]);
-        long n1 = atol(argv[2]);
-        long n2 = atol(argv[3]);
+    else if(n_inputs == 4){// distributed mode
+        long n1 = atol(argv[optind+1]);
+        long n2 = atol(argv[optind+2]);
         if(n1 > n2 || n1 < 1){fprintf(stderr, "Error: requires 1 <= n1 <= n2\n"); return 1;}
-        printf("CCFCCFPRP distributed: B=2^%ld, task %ld of %ld, writing to %s\n", exponent, n1, n2, argv[4]);
-        CCFCCFPRP_distributed(pow(2,exponent), n1, n2, fptr, 0);
+        if(bits_flag){printf("CCFCCFPRP distributed: B=2^%s, task %ld of %ld, writing to %s\n", argv[optind], n1, n2, argv[optind+3]);}
+        else{printf("CCFCCFPRP distributed: B=%s, task %ld of %ld, writing to %s\n", argv[optind], n1, n2, argv[optind+3]);}
+        FILE *fptr=fopen(argv[optind+3], "w");
+        if(!fptr){fprintf(stderr, "Error: could not open %s\n", argv[optind+3]); return 1;}
+        CCFCCFPRP_distributed(get_B(bits_flag, argv[optind]), n1, n2, fptr, 0);
         fclose(fptr);
     }
     else{

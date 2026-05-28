@@ -3,11 +3,11 @@ Repository for some code to count cubic fields ordered by product of ramified pr
 
 ## Usage
 The main useful thing in this repository is the code written in C.  To compile the code (do this once per pull/clone) from the main directory, just run the command below.
-```
+```bash
 ./runme.sh
 ```
 This will produce the packaged executable main.exe.  The syntax for using this executable is then the below.
-```
+```bash
 ./main.exe [-b] <B_or_exponent> <outfile>
 ./main.exe [-b] <B_or_exponent> <n1> <n2> <outfile>
 ```
@@ -25,7 +25,7 @@ This is the main directory of useful code.
     - _CCFCCFPRP\_distributed_: distributed variant for parallelising computation in CCFCCFPRP, distributes on the leading coefficient _a_.
 - *main.c*: A main runner program which packages up CCFCCFPRP and its distributed equivalent for a user-friendly executable.
 ### magma\_code
-**__WARNING:  The magma code is very incomplete and untested, use at significant risk.__**
+**WARNING:  The magma code is very incomplete and untested, use at significant risk.**
 - *CCFCCF.mg*: an implementation of Belabas' CCFCCF in magma, seems to agree with output of pari-gp equivalent so hopefully few bugs.
 - *prototype.mg*: an initial attempt at implementing product of ramified primes in magma, probably full of bugs, decided midway that I was as well just doing it directly in C.
 

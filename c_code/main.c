@@ -21,7 +21,6 @@
  * @endcode
  * e.g. ./main.exe 25 3 100 output.dat
  * runs CCFCCFPRP_distributed with B=2^exponent, writes to outfile.
- * Note:  this will run the CCRCCRPRP algorithm but only for leading coefficient a=n1 mod n2
  */
 #include"CCFCCFPRP.h"
 #include<math.h>

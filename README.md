@@ -17,6 +17,7 @@ if the `-b` flag is set then one should `<B_or_exponent>` to be the maximum numb
 - *runme.sh*: compilation script to compile the CCFCCFPRP user program in c\_code/main.c. 
 
 ### c\_code
+This is the main directory of useful code.
 - *CCFCCF.c*: contains a C implementation of: 
     - _CCFCCF_: Belabas' CCFCCF.
 - *CCFCCFPRP.c*: contains a C implementation of:
@@ -24,7 +25,7 @@ if the `-b` flag is set then one should `<B_or_exponent>` to be the maximum numb
     - _CCFCCFPRP\_distributed_: distributed variant for parallelising computation in CCFCCFPRP, distributes on the leading coefficient _a_.
 - *main.c*: A main runner program which packages up CCFCCFPRP and its distributed equivalent for a user-friendly executable.
 ### magma\_code
-**WARNING:  The magma code is very incomplete and untested, use at significant risk.**
+**__WARNING:  The magma code is very incomplete and untested, use at significant risk.__**
 - *CCFCCF.mg*: an implementation of Belabas' CCFCCF in magma, seems to agree with output of pari-gp equivalent so hopefully few bugs.
 - *prototype.mg*: an initial attempt at implementing product of ramified primes in magma, probably full of bugs, decided midway that I was as well just doing it directly in C.
 

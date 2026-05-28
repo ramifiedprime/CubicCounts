@@ -43,23 +43,23 @@
 int main(int argc, char** argv){
     if(argc == 3){ // standard mode
         FILE *fptr=fopen(argv[2], "w");
-        long exponent = atol(argv[3]);
-        printf("CCFCCFPRP output: B=2^%ld\n", exponent);
+        long exponent = atol(argv[1]);
+        printf("CCFCCFPRP: B=2^%ld writing to %s\n", exponent, argv[2]);
         CCFCCFPRP(pow(2,exponent), fptr, 0);
         fclose(fptr);
     }
     else if(argc == 5){// distributed mode
         FILE *fptr=fopen(argv[4], "w");
-        long n1 = atol(argv[1]);
-        long n2 = atol(argv[2]);
-        long exponent = atol(argv[3]);
-        if(n1 > n2 || n1 < 1){fprintf(stderr, "Error: requires 1 <= n1 <= n2"); return 1;}
-        fprintf(fptr, "CCFCCFPRP distributed output: B=2^%ld, task %ld of %ld\n", exponent, n1, n2);
+        long exponent = atol(argv[1]);
+        long n1 = atol(argv[2]);
+        long n2 = atol(argv[3]);
+        if(n1 > n2 || n1 < 1){fprintf(stderr, "Error: requires 1 <= n1 <= n2\n"); return 1;}
+        printf("CCFCCFPRP distributed: B=2^%ld, task %ld of %ld, writing to %s\n", exponent, n1, n2, argv[4]);
         CCFCCFPRP_distributed(pow(2,exponent), n1, n2, fptr, 0);
         fclose(fptr);
     }
     else{
-        fprintf(stderr, "Error: incorrect number of inputs.");
+        fprintf(stderr, "Error: incorrect number of inputs.\n");
         return 1;
     }
     return 0;

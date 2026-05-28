@@ -4,18 +4,19 @@
  *
  * Recommended compilation:
  * @code
- * gcc main.c CCFCCFPRP.c -lm -o main.exe
+ * gcc -Wall main.c CCFCCFPRP.c -lm -o main.exe
  * @endcode
  * 
  * Standard usage:
  * @code
- *   ./main.exe <exponent> <outfile>
+ *   ./main.exe <B> <outfile>
+ *   ./main.exe -b <exponent> <outfile>
  * @endcode  
- * e.g. ./main.exe 20 output.dat
  * runs CCFCCFPRP with B=2^exponent, writes to outfile.
  * 
  * Distributed usage:
  * @code
+ *   ./main.exe <B> <outfile>
  *   ./main.exe <exponent> <n1> <n2> <outfile>
  * @endcode
  * e.g. ./main.exe 25 3 100 output.dat
@@ -25,6 +26,8 @@
 #include"CCFCCFPRP.h"
 #include<math.h>
 #include<stdlib.h>
+#include <unistd.h>
+
 /**
  * @brief main runs CCFCCFPRP in standard or distributed mode.
 

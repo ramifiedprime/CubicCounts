@@ -1,24 +1,24 @@
 /**
- * @file run.c
+ * @file main.c
  * @brief Entry point for CCFCCFPRP, also supports distributed modes.
  *
  * Recommended compilation:
  * @code
- * gcc run.c CCFCCFPRP.c -lm -o run.exe
+ * gcc main.c CCFCCFPRP.c -lm -o main.exe
  * @endcode
  * 
  * Standard usage:
  * @code
- *   ./run.exe <exponent> <outfile>
+ *   ./main.exe <exponent> <outfile>
  * @endcode  
- * e.g. ./run.exe 20 output.dat
+ * e.g. ./main.exe 20 output.dat
  * runs CCFCCFPRP with B=2^exponent, writes to outfile.
  * 
  * Distributed usage:
  * @code
- *   ./run.exe <exponent> <n1> <n2> <outfile>
+ *   ./main.exe <exponent> <n1> <n2> <outfile>
  * @endcode
- * e.g. ./run.exe 25 3 100 output.dat
+ * e.g. ./main.exe 25 3 100 output.dat
  * runs CCFCCFPRP_distributed with B=2^exponent, writes to outfile.
  * Note:  this will run the CCRCCRPRP algorithm but only for leading coefficient a=n1 mod n2
  */
@@ -30,8 +30,8 @@
 
  * Useage is one of the two types below:
  * @code
- *   ./run.exe <exponent> <outfile>
- *   ./run.exe <exponent> <n1> <n2> <outfile>
+ *   ./main.exe <exponent> <outfile>
+ *   ./main.exe <exponent> <n1> <n2> <outfile>
  * @endcode
  * 
  * @param exponent the bound for the number of bits of the product of ramified primes, i.e. B=2^exponent for CCFCCFPRP.

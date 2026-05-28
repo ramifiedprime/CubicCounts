@@ -349,7 +349,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  * @return 0
  */
 
-int CCFCCFPRP_distributed(long B, int n1, int n2, int FILE *fptr, int verbose){
+int CCFCCFPRP_distributed(long B, int n1, int n2, FILE *fptr, int verbose){
     int i=0;
     if(verbose>=2){printf("Initialising...\n");}
     long* p = primes_up_to(3*B);

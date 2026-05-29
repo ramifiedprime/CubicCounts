@@ -242,7 +242,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
     long b, c, d, f, P, Q, R, check, gcdPR;
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
-    __int128 D;
+    __int128 D,prp;
     long D_cut, D_base, quadbd;
     double B_bd, C_bd, d_lin_ubd, temp, tempdisc, d_disc_lo, d_disc_hi;
     double alpha_d,beta_d,gamma_d;
@@ -265,11 +265,11 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
             D= (__int128)Q*Q+(__int128)D_base;
             if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
             f=gcd(gcdPR, Q);
-
-            if(prpat6(D/3)>B*f){continue;} // IF PRP
+            prp=prpat6(D/((__int128)3*f));
+            if(prp>B){continue;} // IF PRP
             check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
             if(check){
-                fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(3*f)); // output is a,b,c,d,quadratic
+                fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)prp); // output is a,b,c,d,quadratic
             }
         }
     }
@@ -321,10 +321,11 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety 
                     f = gcd(P, gcd(Q,R));
-                    if(prpat6(D/3) > B*f){ continue; }
+                    prp=prpat6(D/((__int128)3*f));
+                    if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }
                 }
             } else {
@@ -341,10 +342,11 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
-                    if(prpat6(D/3) > B*f){ continue; }
+                    prp=prpat6(D/((__int128)3*f));
+                    if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }
                 }
 
@@ -357,10 +359,11 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety net
                     f = gcd(P, gcd(Q,R));
-                    if(prpat6(D/3) > B*f){ continue; }
+                    prp=prpat6(D/((__int128)3*f));
+                    if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
-                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
+                        fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }
                 }
             }

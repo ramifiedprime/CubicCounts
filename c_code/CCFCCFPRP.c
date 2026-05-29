@@ -206,6 +206,21 @@ double U(long a, long b){
     if(a>=2.0*b/3){return ((double)b*b)/(3.0*a);}
     else{return b-3*((double)a)/4.0;}
 }
+
+/**
+ * @brief Takes in disriminant of the hessian divided by 3, which is the absolute value of the discriminant of the proposed cubic, and replaces the factor supported on 6 with its largest squarefree divisor.
+ * 
+ * @param n=2^a*3^b*m
+ * @return 2^{min(a,1)}*3^{min(b,1)}*m
+ */
+__int128 prpat6(__int128 n){
+    long supp=1;
+    if(n%2==0){supp*=2; while(n%2==0)n/=2;}
+    if(n%3==0){supp*=3; while(n%3==0)n/=3;}
+    return n*supp;
+}
+
+
 /**
  * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7) with fixed first coefficient a.
  * 
@@ -224,14 +239,14 @@ double U(long a, long b){
  * @return 0
  */
 int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, int verbose){
-    long b,c,d,f,P,Q,R,check,gcdPR;
+    long b, c, d, f, P, Q, R, check, gcdPR;
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
     __int128 D;
-    long D_cut, D_base,quadbd; 
-    double B_bd,C_bd,d_lin_ubd,temp,tempdisc,d_disc_lo,d_disc_hi;
+    long D_cut, D_base, quadbd;
+    double B_bd, C_bd, d_lin_ubd, temp, tempdisc, d_disc_lo, d_disc_hi;
     double alpha_d,beta_d,gamma_d;
-    long d_lin_lbd,d_lbd,quad_hi,quad_lo,lo,hi,hi1,lo1;
+    long d_lin_lbd, d_lbd, quad_hi, quad_lo, lo, hi, hi1, lo1;
     if(verbose>=2){printf("...a=%ld, b=0\n", a);}
 
     // b=0 cases
@@ -250,7 +265,8 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
             D= (__int128)Q*Q+(__int128)D_base;
             if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
             f=gcd(gcdPR, Q);
-            if(D>3*B*f){continue;} // IF PRP
+
+            if(prpat6(D/3)>B*f){continue;} // IF PRP
             check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
             if(check){
                 fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)D/(3*f)); // output is a,b,c,d,quadratic
@@ -293,7 +309,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
             // where root_lo/hi = (b -/+ sqrt(b^2+4a(a-c)))/2.
             // If form_disc = b^2+4a(a-c) < 0: no real roots, quadratic always positive,
             // condition always satisfied — single interval [lo, hi].
-            // If form_disc >= 0: two valid sub-intervals, run two separate loops. --- */
+            // If form_disc >= 0: two valid sub-intervals, run two separate loops. 
             quadbd = a*(a-c);
             tempdisc = (double)b*b + 4.0*(double)quadbd;
 
@@ -303,9 +319,9 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     Q = b*c - 9*a*d;
                     R = c*c - 3*b*d;
                     D = (__int128)Q*Q - (__int128)4*P*R;
-                    if(D <= 0 || D > tX){ continue; } /* safety net */
+                    if(D <= 0 || D > tX){ continue; } // safety 
                     f = gcd(P, gcd(Q,R));
-                    if(D > 3*B*f){ continue; }
+                    if(prpat6(D/3) > B*f){ continue; }
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
@@ -325,7 +341,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
-                    if(D > 3*B*f){ continue; }
+                    if(prpat6(D/3) > B*f){ continue; }
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));
@@ -341,7 +357,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety net
                     f = gcd(P, gcd(Q,R));
-                    if(D > 3*B*f){ continue; }
+                    if(prpat6(D/3) > B*f){ continue; }
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)D/(3*f));

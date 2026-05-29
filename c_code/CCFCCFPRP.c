@@ -393,7 +393,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
     long i=0;
     if(verbose>=2){printf("Initialising...\n");}
-    long* p = primes_up_to(3*B);
+    long* p = primes_up_to(13*B);
     if(verbose>=2){printf("...p initialised\n");}
     long* pp = (long*)malloc((p[0]+1)*sizeof(long));
     pp[0]=p[0];
@@ -404,7 +404,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
     if(verbose>=2){printf("...dumping p...");}
     free(p);
     if(verbose>=2){printf("done.\n");}
-    long* sqfull = get_sqfull(pp,3*B);
+    long* sqfull = get_sqfull(pp,13*B);
     free(pp);
     if(verbose>=2){printf("...sqfull initialised\n");}
     if(verbose>=2){printf("...done.\n");}

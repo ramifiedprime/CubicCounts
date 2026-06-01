@@ -4,9 +4,9 @@ Repository for some code to count cubic fields ordered by product of ramified pr
 ## Usage
 The main useful thing in this repository is the code written in C.  To compile the code (do this once per pull/clone) from the main directory, just run the command below.
 ```bash
-./runme.sh
+make
 ```
-This will produce the packaged executable main.exe.  The syntax for using this executable is then the below.
+This will produce the packaged executable `CCFCCFPRP.exe`.  The syntax for using this executable is then the below.
 ```bash
 ./main.exe [-b] <B_or_exponent> <outfile>
 ./main.exe [-b] <B_or_exponent> <n1> <n2> <outfile>

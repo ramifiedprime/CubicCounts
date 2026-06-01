@@ -245,7 +245,7 @@ double U(long a, long b){
  * where ax^3+bx^2y+cxy^2+dy^3 is a reduced binary cubic form corresponding 
  * to a complex cubic field, D is the discriminant of the Hessian, f is its content, and L is the
  * associated quadratic resolvent, and prp is the product of ramified primes.
- * This function obtains all such entries with fixed (a,b) and product of ramified primes at most X.
+ * This function obtains all such entries with fixed (a,b) and product of ramified primes at most B.
  * 
  * @param a first coefficient of the binary cubic form
  * @param B product of ramified primes bound for cubic fields.

@@ -237,15 +237,15 @@ double U(long a, long b){
 }
 
 /**
- * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7) with fixed first coefficient a.
+ * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7) with fixed first two coefficients (a,b) where b is nonzero.
  * 
  * Implements Belabas' algorithm, but makes cuts for product of ramified primes
  * ordering.  The results are printed to a file, where results take the form of rows:
- *      a,b,c,d,|Disc(L)|,D/-3f\n
+ *      a,b,c,d,|Disc(L)|,prp\n
  * where ax^3+bx^2y+cxy^2+dy^3 is a reduced binary cubic form corresponding 
  * to a complex cubic field, D is the discriminant of the Hessian, f is its content, and L is the
- * associated quadratic resolvent.  Note that D/-3f is (away from 2) the product of ramified primes.  
- * This function obtains all such entries with fixed a and product of ramified primes at most X.
+ * associated quadratic resolvent, and prp is the product of ramified primes.
+ * This function obtains all such entries with fixed (a,b) and product of ramified primes at most X.
  * 
  * @param a first coefficient of the binary cubic form
  * @param B product of ramified primes bound for cubic fields.
@@ -253,46 +253,41 @@ double U(long a, long b){
  * @param verbose verbosity flag for bug-tests.
  * @return 0
  */
-int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, int verbose){
-    long b, c, d, f, P, Q, R, check, gcdPR;
+int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FILE *fptr, int verbose){
+    long c, d, f, P, Q, R, check, gcdPR;
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
     __int128 D,prp;
     long D_cut, D_base, quadbd;
-    double B_bd, C_bd, d_lin_ubd, temp, tempdisc, d_disc_lo, d_disc_hi;
+    double C_bd, d_lin_ubd, temp, tempdisc, d_disc_lo, d_disc_hi;
     double alpha_d,beta_d,gamma_d;
     long d_lin_lbd, d_lbd, quad_hi, quad_lo, lo, hi, hi1, lo1;
-    if(verbose>=2){printf("...a=%ld, b=0\n", a);}
-
-    // b=0 cases
-    C_bd=pow(((double)X)/(4*a), 1.0/3);
-    for(c=1; c<=C_bd; c++){
-        // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
-        P= -3*a*c;
-        R= c*c;
-        D_base= -4*P*R;
-        d_lbd=0;
-        gcdPR=gcd(P,R);
-        D_cut=3*B*gcdPR;
-        if(c<=a){d_lbd = (long)floor(sqrt(a*(a-c)));}
-        for(d=d_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
-            Q= -9*a*d;
-            D= (__int128)Q*Q+(__int128)D_base;
-            if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
-            f=gcd(gcdPR, Q);
-            prp=prpat6(D/((__int128)3*f));
-            if(prp>B){continue;} // IF PRP
-            check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
-            if(check){
-                fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)prp); // output is a,b,c,d,quadratic
+    if(b==0){
+        C_bd=pow(((double)X)/(4*a), 1.0/3);
+        for(c=1; c<=C_bd; c++){
+            // if(verbose){printf("...a=%ld, c = %ld\n", a, c);}
+            P= -3*a*c;
+            R= c*c;
+            D_base= -4*P*R;
+            d_lbd=0;
+            gcdPR=gcd(P,R);
+            D_cut=3*B*gcdPR;
+            if(c<=a){d_lbd = (long)floor(sqrt(a*(a-c)));}
+            for(d=d_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
+                Q= -9*a*d;
+                D= (__int128)Q*Q+(__int128)D_base;
+                if(D>D_cut){break;} // check disc, note as b=0 then  once D gets big it only gets bigger as d increases for fixed a,c
+                f=gcd(gcdPR, Q);
+                prp=prpat6(D/((__int128)3*f));
+                if(prp>B){continue;} // IF PRP
+                check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
+                if(check){
+                    fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)prp); // output is a,b,c,d,quadratic disc, prp
+                }
             }
         }
     }
-
-    //b>0 cases
-    B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
-    for(b=1; b<=B_bd; b++){
-        if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
+    else{
         C_bd=U(a,b)+pow(((double)X)/(4.0*a), 1.0/3);
         for(c=(1-b); c<=C_bd; c++){
             P = b*b - 3*a*c;
@@ -388,6 +383,40 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
 }
 
 
+
+
+
+
+/**
+ * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7) with fixed first coefficient a.
+ * 
+ * Implements Belabas' algorithm, but makes cuts for product of ramified primes
+ * ordering.  The results are printed to a file, where results take the form of rows:
+ *      a,b,c,d,|Disc(L)|,D/-3f\n
+ * where ax^3+bx^2y+cxy^2+dy^3 is a reduced binary cubic form corresponding 
+ * to a complex cubic field, D is the discriminant of the Hessian, f is its content, and L is the
+ * associated quadratic resolvent.  Note that D/-3f is (away from 2) the product of ramified primes.  
+ * This function obtains all such entries with fixed a and product of ramified primes at most B.
+ * 
+ * @param a first coefficient of the binary cubic form
+ * @param B product of ramified primes bound for cubic fields.
+ * @param *fptr file to output results to.
+ * @param verbose verbosity flag for bug-tests.
+ * @return 0
+ */
+int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, int verbose){
+    long b;
+    double B_bd;
+    if(verbose>=2){printf("...a=%ld, b=0\n", a);}
+    B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
+    for(b=0; b<=B_bd; b++){
+        if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
+        CCFCCFPRP_fixed_ab(a,b,sqfull, X, tX, B,fptr,verbose);
+    }
+    return 0;
+}
+
+
 /**
  * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7).
  * 
@@ -469,12 +498,20 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     free(pp);
     if(verbose>=2){printf("...sqfull initialised\n");}
     if(verbose>=2){printf("...done.\n");}
+    
     // do looping
-    long X=54*B*B, tX=3*X, a;
-    double A_bd;
+    long X=54*B*B, tX=3*X, a, b, idx=0;
+    double A_bd,B_bd;
     A_bd=pow((16.0*X)/27, 1.0/4);
-    for(a=n1;a<=A_bd;a+=n2){
-        CCFCCFPRP_fixeda(a,sqfull, X, tX, B,fptr,verbose);
+    for(a=1;a<=A_bd;a++){
+        B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
+        for(b=0; b<=B_bd; b++){
+            if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
+            if(idx%n2==n1-1){
+                CCFCCFPRP_fixed_ab(a,b,sqfull, X, tX, B,fptr,verbose);
+            }
+            idx++;
+        }
     }
     if(verbose>=1){printf("...done.\n");}
     free(sqfull);

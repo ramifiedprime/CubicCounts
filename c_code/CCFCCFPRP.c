@@ -29,6 +29,33 @@ long gcd(long a, long b){
 }
 
 /**
+ * @brief Takes in integer and returns the prime-to-6-part
+ * 
+ * @param f=2^a3^bm for some m coprime to 6
+ * @return m
+ */
+long primeto6part(long f){
+    if(f==0){return f;}
+    while(f%2==0){f/=2;}
+    while(f%3==0){f/=3;}
+    return f;
+}
+
+/**
+ * @brief Takes in disriminant of the hessian divided by 3, which is the absolute value of the discriminant of the proposed cubic, and replaces the factor supported on 6 with its largest squarefree divisor.
+ * 
+ * @param n=2^a*3^b*m
+ * @return 2^{min(a,1)}*3^{min(b,1)}*m
+ */
+__int128 prpat6(__int128 n){
+    long supp=1;
+    if(n%2==0){supp*=2; while(n%2==0)n/=2;}
+    if(n%3==0){supp*=3; while(n%3==0)n/=3;}
+    return n*supp;
+}
+
+
+/**
  * @brief Obtains all primes up to a bound 
  * 
  * Implements Erastosthenes sieve, no cleverness applied, to return all primes
@@ -150,7 +177,7 @@ long get_quad_disc(long t, long u){
  * @return quadratic disriminant of the associated field, or 0 if it fails to correspond.
  */
 long test(long a, long b, long c, long d, long D, long f, long* sqfull){
-    long a9,d9,t,u;
+    long a9,d9,t,u,f_primeto6;
     if ((D%27)==0 && (f%3!=0)){return 0;} // Not in V3 and not (1^3)
     else if(f%3==0){// checking if in U3 given that it's 1^3
         a9 = a%9;
@@ -160,12 +187,14 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull){
         else if((((a9-d9)%3)==0) && ((a9-b+c-d9)%9)==0){return 0;}
         else if((((a9+d9)%3)==0) && ((a9+b+c+d9)%9)==0){return 0;}
     }
-    if(f>sqfull[0]){printf("Overflow on sqfull: sqfull[0]=%ld, f=%ld\n", sqfull[0],f);}
-    if(sqfull[f]){return 0;}
+    f_primeto6=primeto6part(f);
+    if(f_primeto6>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, f_primeto6=%ld\n", sqfull[0],f_primeto6);}
+    if(sqfull[f_primeto6]){return 0;}
     t = labs(D/(f*f));
     u = gcd(t,3888);
     t = t/u;
     if(gcd(t,f)!=1){return 0;}
+    if(t>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, t=%ld\n", sqfull[0],t);}
     if (sqfull[t]){return 0;}
     return get_quad_disc(t, u);
 }
@@ -206,20 +235,6 @@ double U(long a, long b){
     if(a>=2.0*b/3){return ((double)b*b)/(3.0*a);}
     else{return b-3*((double)a)/4.0;}
 }
-
-/**
- * @brief Takes in disriminant of the hessian divided by 3, which is the absolute value of the discriminant of the proposed cubic, and replaces the factor supported on 6 with its largest squarefree divisor.
- * 
- * @param n=2^a*3^b*m
- * @return 2^{min(a,1)}*3^{min(b,1)}*m
- */
-__int128 prpat6(__int128 n){
-    long supp=1;
-    if(n%2==0){supp*=2; while(n%2==0)n/=2;}
-    if(n%3==0){supp*=3; while(n%3==0)n/=3;}
-    return n*supp;
-}
-
 
 /**
  * @brief Recovers cubic fields of bounded product of ramified primes (adapts algorithm 5.7) with fixed first coefficient a.
@@ -343,7 +358,7 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
                     prp=prpat6(D/((__int128)3*f));
-                    if(prp>B){continue;} // IF PRP
+                    if(prp>B){continue;}
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
@@ -439,7 +454,7 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     long i=0;
     if(verbose>=2){printf("Initialising...\n");}
-    long* p = primes_up_to(3*B);
+    long* p = primes_up_to(13*B);
     if(verbose>=2){printf("...p initialised\n");}
     long* pp = (long*)malloc((p[0]+1)*sizeof(long));
     pp[0]=p[0];
@@ -450,7 +465,7 @@ int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
     if(verbose>=2){printf("...dumping p...");}
     free(p);
     if(verbose>=2){printf("done.\n");}
-    long* sqfull = get_sqfull(pp,3*B);
+    long* sqfull = get_sqfull(pp,13*B);
     free(pp);
     if(verbose>=2){printf("...sqfull initialised\n");}
     if(verbose>=2){printf("...done.\n");}

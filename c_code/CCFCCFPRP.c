@@ -278,7 +278,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
             D_base= -4*P*R;
             d_lbd=0;
             gcdPR=gcd(P,R);
-            D_cut=3*B*gcdPR;
+            D_cut=18*B*gcdPR;
             if(c<=a){d_lbd = (long)floor(sqrt(a*(a-c)));}
             for(d=d_lbd+1; d<=(a+c)-1; d++){ //Lemma 4.2 (12) for LB, (13) for UB 
                 Q= -9*a*d;

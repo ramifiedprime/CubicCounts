@@ -264,8 +264,8 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
     long c, d, f, P, Q, R, check, gcdPR;
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
-    __int128 D,prp;
-    long D_cut, D_base, quadbd;
+    __int128 D, prp, D_cut;
+    long D_base, quadbd;
     double C_bd, d_lin_ubd, temp, tempdisc, d_disc_lo, d_disc_hi;
     double alpha_d,beta_d,gamma_d;
     long d_lin_lbd, d_lbd, quad_hi, quad_lo, lo, hi, hi1, lo1;

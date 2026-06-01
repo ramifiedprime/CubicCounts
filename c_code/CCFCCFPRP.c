@@ -248,7 +248,14 @@ double U(long a, long b){
  * This function obtains all such entries with fixed (a,b) and product of ramified primes at most B.
  * 
  * @param a first coefficient of the binary cubic form
+ * @param b second coefficient of the binary cubic form
+ * @param sqfull long list where sqfull[n] is false iff n is sqfree away from 6
+ * @param X bound for discriminant
+ * @param tX 3X 
  * @param B product of ramified primes bound for cubic fields.
+ * @param *fptr file to output results to.
+ * @param verbose verbosity flag for bug-tests.
+ * @return 0
  * @param *fptr file to output results to.
  * @param verbose verbosity flag for bug-tests.
  * @return 0
@@ -399,6 +406,9 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
  * This function obtains all such entries with fixed a and product of ramified primes at most B.
  * 
  * @param a first coefficient of the binary cubic form
+ * @param sqfull long list where sqfull[n] is false iff n is sqfree away from 6
+ * @param X bound for discriminant
+ * @param tX 3X 
  * @param B product of ramified primes bound for cubic fields.
  * @param *fptr file to output results to.
  * @param verbose verbosity flag for bug-tests.

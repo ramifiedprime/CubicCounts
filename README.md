@@ -1,6 +1,8 @@
 # Cubic Counts
 Repository for some code to count cubic fields ordered by product of ramified primes.  Essentially just implementing the algorithm in Belabas' article [1], which counts by discriminant, and modifying in appropriate places to get the required count.  Only interested in complex cubics for now, since that's where my practical interest is.
 
+**WARNING:** This is all still very much in development, and output is not guaranteed to be correct.
+
 ## Usage
 The main useful thing in this repository is the code written in C.  To compile the code (do this once per pull/clone) from the main directory, just run the command below.
 ```bash

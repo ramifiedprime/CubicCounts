@@ -45,12 +45,12 @@ long primeto6part(long f){
  * @brief Takes in disriminant of the hessian, which is the absolute value of the discriminant of the proposed cubic, and the content of the Hessian f.  If the form represents a cubic field then this returns the product of ramified primes, else it just returns the product of ramified primes with extra exponents in places
  * 
  * @param D discriminant of Hessian
- * @param f content of the Hessian
+ * @param f_primeto6 prime to 6 part of content of the Hessian
  * @return product of ramified primes (or approximation if invalid form)
  */
 __int128 get_prospective_prp(__int128 D, long f_primeto6){
     if(D==0){return 0;}
-    long prp=D/3; // initialised as abs disc of field
+    __int128 prp=(D/3); // initialised as abs disc of field
     prp/=f_primeto6;// correct prp for primes >3 if corresp to field
     while(prp%9==0){prp/=3;} // fix p=3
     while(prp%4==0){prp/=2;} // fix p=2
@@ -264,7 +264,8 @@ double U(long a, long b){
  * @return 0
  */
 int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FILE *fptr, int verbose){
-    long c, d, f, P, Q, R, check, gcdPR;
+    int f_isdivby3;
+    long c, d, f, f_primeto6, P, Q, R, check, gcdPR;
     // 54 is to account for wild ramification at 2 and 3
     // int128 is to account for B around 30 bits
     __int128 D, prp, D_cut;
@@ -288,8 +289,10 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                 D= (__int128)Q*Q+(__int128)D_base;
                 if(D>D_cut){break;} // check disc, note as b=0 then once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(gcdPR, Q);
-                prp=get_prospective_prp(D,f);
-                if(prp>B){continue;} // IF PRP
+                f_isdivby3 = (f%3 == 0);
+                f_primeto6=primeto6part(f);
+                prp=get_prospective_prp(D,f_primeto6);
+                if(prp>B){continue;} // PRP bound
                 check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)prp); // output is a,b,c,d,quadratic disc, prp
@@ -341,7 +344,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety 
                     f = gcd(P, gcd(Q,R));
-                    prp=get_prospective_prp(D,f);
+                    prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
@@ -362,7 +365,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
-                    prp=get_prospective_prp(D,f);
+                    prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;}
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
@@ -379,7 +382,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety net
                     f = gcd(P, gcd(Q,R));
-                    prp=get_prospective_prp(D,f);
+                    prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){

@@ -29,10 +29,10 @@ long gcd(long a, long b){
 }
 
 /**
- * @brief Takes in integer and returns the prime-to-6-part
+ * @brief Takes in integer and returns the prime-to-6-part as well as data of whether it was divisible by 2 or 3
  * 
  * @param f=2^a3^bm for some m coprime to 6
- * @return m
+ * @return m, f_isdivby2, f_isdivby3
  */
 long primeto6part(long f){
     if(f==0){return f;}
@@ -128,82 +128,22 @@ long* get_sqfull(long* pp, long X){
 }
 
 /**
- * @brief recovers the quadratic discriminant associated to a complex cubic field
+ * @brief recovers the quadratic discriminant associated to a complex cubic field given positive u which is squarefree away from 6 and is an integer such that squareroot of -u gives the resolvent quadratic.
  * 
- * Given a reduced cubic form F associated to a cubic field K by Delone--Fadeev
- * correspondence, let D be the discriminant of the Hessian and f its content.  Recall that D=-3*Disc(F) and f^2|D.
- * Then we use D/f^2 to determine the associated quadratic discriminant.  t is the prime-to-6 part of this fraction, which
- * is necessarily the squarefree prime-to-6 part of the quadratic discriminant.  u is the gcd of this fraction and 72, which
- * precisely determines the 2 and 3 parts of the discriminant by standard arguments. 
- * 
- * Indeed, precisely $K=\mathbb{Q}(sqrt{-ut/3})$
- * 
- * @param t prime-to-6 squarefree part of D
- * @param u Greatest common divisor of D/f^2 and 3^5x2^4.
- * @return Associated quadratic discriminant.
+ * @param u: integer
+ * @return absolute value of quadratic discriminant.
  */
-long get_quad_disc(long t, long u){
-    t=t*3*u;
-    while(t%9==0){
-        t=t/9;
-    }
-    while(t%4==0){
-        t=t/4;
-    }
-    if(t%4!=3){
-        return 4*t;
-    }
-    return t;
+long get_quad_disc(long u){
+    while(u%9 == 0){u/=9;} // get squarefree above 3
+    while(u%4 == 0){u/=4;} // get squarefree above 2
+    if (u%4 == 3){return u;}
+    return 4*u;
 }
 
 
 
 /**
- * @brief tests whether a reduced cubic form corresponds to a field, implements `test` (sub-algorithm 5.2) with a modification for working in the product of ramified primes setting:  
- *  We call get_sqfull(pp,3*B), so that the range of the squarefull numbers in sqfull is up to 3B. Our input t will satisfy
- *     t=D/(f^2u)<=D/f^2<=3Bf/f^2<= 3B,
- * we can always just do the lookup in the sqfull table.
- * 
- * Assumes that the input is in U_2 already (i.e. satisfies 2-adic constraint)
- * Tests belonging to U_3 by congruences, then checks minmality at other primes
- * by checking if D/f^2 is squarefree and coprime to f away from 6.
- * 
- * returns 0 at any failure, returns the associated quadratic discriminant if true.
- * 
- * @param a First coefficient of cubic form.
- * @param b Second coefficient of cubic form.
- * @param c Third coefficient of cubic form.
- * @param d Fourth coefficient of cubic form.
- * @param D Discriminant of Hessian(a,b,c,d).
- * @param f Content of Hessian(a,b,c,d).
- * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6.
- * @return quadratic disriminant of the associated field, or 0 if it fails to correspond.
- */
-long test(long a, long b, long c, long d, long D, long f, long* sqfull){
-    long a9,d9,t,u,f_primeto6;
-    if ((D%27)==0 && (f%3!=0)){return 0;} // Not in V3 and not (1^3)
-    else if(f%3==0){// checking if in U3 given that it's 1^3
-        a9 = a%9;
-        d9 = d%9;
-        if(a9==0 || d9==0){return 0;}
-        else if(((a9%3)==0)&&((d9%3)==0)){return 0;}
-        else if((((a9-d9)%3)==0) && ((a9-b+c-d9)%9)==0){return 0;}
-        else if((((a9+d9)%3)==0) && ((a9+b+c+d9)%9)==0){return 0;}
-    }
-    f_primeto6=primeto6part(f);
-    if(f_primeto6>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, f_primeto6=%ld\n", sqfull[0],f_primeto6);}
-    if(sqfull[f_primeto6]){return 0;}
-    t = labs(D/(f*f));
-    u = gcd(t,3888);
-    t = t/u;
-    if(gcd(t,f)!=1){return 0;}
-    if(t>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, t=%ld\n", sqfull[0],t);}
-    if (sqfull[t]){return 0;}
-    return get_quad_disc(t, u);
-}
-
-/**
- * @brief Implements `is_complex_field` (sub-algorithm 5.6)
+ * @brief Implements `is_complex_field` and `test` (sub-algorithms 5.6 and 5.3)
  * 
  * Tests belonging to U_2 and negative discriminant, then just runs test.
  * 
@@ -212,19 +152,42 @@ long test(long a, long b, long c, long d, long D, long f, long* sqfull){
  * @param c Third coefficient of cubic form.
  * @param d Fourth coefficient of cubic form.
  * @param P First coefficient of Hessian.
- * @param Q Second coefficient of Hessian.
  * @param R Third coefficient of Hessian.
  * @param D Discriminant of Hessian(a,b,c,d).
  * @param f Content of Hessian(a,b,c,d).
  * @param sqfull array of length X+1 such that `sqfull[n]` is false if and only if it's squarefree away from 6.
  * @return test(a,b,c,d,D,f,sqfull).
  */
-long is_complex_field(long a, long b, long c, long d, long P, long Q, long R, long D, long f,long* sqfull){
-        if((D <= 0) || (D%16==0) || (D%16==4 && (P%2!=0 || R%2!=0))){
-            return 0;
-        }
-        // printf("\tpassed U2 check, now running test\n");
-        return test(a,b,c,d,D,f,sqfull);
+long is_complex_field(long a, long b, long c, long d, long P, long R, __int128 D, int f_isdivby3, long f_primeto6, long* sqfull){
+    long t,u;
+    // Local conditions at p>3:  these are quick lookups
+    if(f_primeto6>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, f_primeto6=%ld\n", sqfull[0],f_primeto6);}
+    if(sqfull[f_primeto6]){return 0;}
+    // TODO: this will probably overflow?
+    u = D/(3*f_primeto6*f_primeto6); // u is the thing we take sqrt of for resolvent quadratic, it will be the cubic disc minus primes in the content larger than 3.
+    t = primeto6part(u);
+    if(gcd(t,f_primeto6)!=1){return 0;}
+    if(t>sqfull[0]){fprintf(stderr, "Overflow on sqfull: sqfull[0]=%ld, t=%ld\n", sqfull[0],t);}
+    if (sqfull[t]){return 0;}
+
+    // Local condition at 2
+    if((D <= 0) || (D%16==0) || (D%16==4 && (P%2!=0 || R%2!=0))){
+        return 0;
+    }
+
+    // Local condition at 3;
+    long a9,d9;
+    if ((u%9)==0 && (!f_isdivby3)){return 0;} // Not in V3 and not (1^3)
+    else if(f_isdivby3){// checking if in U3 given that it's 1^3
+        a9 = a%9;
+        d9 = d%9;
+        if(a9==0 || d9==0){return 0;}
+        else if(((a9%3)==0)&&((d9%3)==0)){return 0;}
+        else if((((a9-d9)%3)==0) && ((a9-b+c-d9)%9)==0){return 0;}
+        else if((((a9+d9)%3)==0) && ((a9+b+c+d9)%9)==0){return 0;}
+    }
+    // Checks all passed, it's a field, return the quadratic resolvent disc.  Since the checks have passed, u is squarefree away from 
+    return get_quad_disc(u);
 }
 
 /**
@@ -293,7 +256,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                 f_primeto6=primeto6part(f);
                 prp=get_prospective_prp(D,f_primeto6);
                 if(prp>B){continue;} // PRP bound
-                check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
+                check=is_complex_field(a,0,c,d,P,R,D,f_isdivby3,f_primeto6,sqfull);
                 if(check){
                     fprintf(fptr,"%ld,%d,%ld,%ld,%ld,%ld\n",a,0,c,d,check,(long)prp); // output is a,b,c,d,quadratic disc, prp
                 }
@@ -344,9 +307,11 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety 
                     f = gcd(P, gcd(Q,R));
+                    f_isdivby3 = (f%3 == 0);
+                    f_primeto6=primeto6part(f);
                     prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;} // IF PRP
-                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    check = is_complex_field(a,b,c,d,P,R,D,f_isdivby3,f_primeto6,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }
@@ -365,9 +330,11 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
+                    f_isdivby3 = (f%3 == 0);
+                    f_primeto6=primeto6part(f);
                     prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;}
-                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    check = is_complex_field(a,b,c,d,P,R,D,f_isdivby3,f_primeto6,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }
@@ -382,9 +349,11 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety net
                     f = gcd(P, gcd(Q,R));
+                    f_isdivby3 = (f%3 == 0);
+                    f_primeto6=primeto6part(f);
                     prp=get_prospective_prp(D,f_primeto6);
                     if(prp>B){continue;} // IF PRP
-                    check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
+                    check = is_complex_field(a,b,c,d,P,R,D,f_isdivby3,f_primeto6,sqfull);
                     if(check){
                         fprintf(fptr,"%ld,%ld,%ld,%ld,%ld,%ld\n",a,b,c,d,check,(long)prp);
                     }

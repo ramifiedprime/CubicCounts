@@ -36,7 +36,7 @@ This is the main directory of useful code.
 - [x] wrap CCFCCFPRP.c into a library rather than a .c
 - [x] comment code carefully
 - [x] make efficiency edits for product of ramified prime countsi
-- [ ] Clean up code to remove tX and X etc, so things are clearer
+- [ ] Write explainer of algorithm applied, since deviation has become nontrivial
 - [ ] \(optional) fix prototype.mg so that it at least works
 - [ ] \(optional) write CRFCRF version (for real cubics)
 

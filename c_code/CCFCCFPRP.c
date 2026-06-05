@@ -48,12 +48,10 @@ long primeto6part(long f){
  * @param f content of the Hessian
  * @return product of ramified primes (or approximation if invalid form)
  */
-__int128 prpat6(__int128 D, long f){
-    long supp=f; // initialised as value of f
+__int128 get_prospective_prp(__int128 D, long f_primeto6){
+    if(D==0){return 0;}
     long prp=D/3; // initialised as abs disc of field
-    // Compute prospective prp at primes p>3
-    while(supp%3==0){supp/=3;}// remove 3s
-    prp/=supp;// correct prp for primes >3 if corresp to field
+    prp/=f_primeto6;// correct prp for primes >3 if corresp to field
     while(prp%9==0){prp/=3;} // fix p=3
     while(prp%4==0){prp/=2;} // fix p=2
     return prp;
@@ -290,7 +288,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                 D= (__int128)Q*Q+(__int128)D_base;
                 if(D>D_cut){break;} // check disc, note as b=0 then once D gets big it only gets bigger as d increases for fixed a,c
                 f=gcd(gcdPR, Q);
-                prp=prpat6(D,f);
+                prp=get_prospective_prp(D,f);
                 if(prp>B){continue;} // IF PRP
                 check=is_complex_field(a,0,c,d,P,Q,R,(long)D,f,sqfull);
                 if(check){
@@ -343,7 +341,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety 
                     f = gcd(P, gcd(Q,R));
-                    prp=prpat6(D,f);
+                    prp=get_prospective_prp(D,f);
                     if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
@@ -364,7 +362,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety
                     f = gcd(P, gcd(Q,R));
-                    prp=prpat6(D,f);
+                    prp=get_prospective_prp(D,f);
                     if(prp>B){continue;}
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){
@@ -381,7 +379,7 @@ int CCFCCFPRP_fixed_ab(long a, long b, long* sqfull, long X, long tX, long B, FI
                     D = (__int128)Q*Q - (__int128)4*P*R;
                     if(D <= 0 || D > tX){ continue; } // safety net
                     f = gcd(P, gcd(Q,R));
-                    prp=prpat6(D,f);
+                    prp=get_prospective_prp(D,f);
                     if(prp>B){continue;} // IF PRP
                     check = is_complex_field(a,b,c,d,P,Q,R,(long)D,f,sqfull);
                     if(check){

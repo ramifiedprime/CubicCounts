@@ -61,14 +61,13 @@ __int128 get_prospective_prp(__int128 D, long f_primeto6){
 /**
  * @brief Obtains all primes up to a bound 
  * 
- * Implements Erastosthenes sieve, no cleverness applied, to return all primes
- * up to given bound.
+ * Implements Erastosthenes sieve, no cleverness applied, to return all squares of primes where the primes are bounded by X.
  * 
  * @param X bound for the set of primes.
- * @return primes array primes with primes[0] being the number of primes up to X
- *         and primes[i] being the ith prime for i>=1.
+ * @return prime_squares array prime_squares with prime_squares[0] being the number of primes up to X
+ *         and prime_squares[i] being the square of the ith prime for i>=1 who is less than X.
  */
-long* primes_up_to(long X){
+long* prime_squares_up_to(long X){
     // printf("Initialising p...\n");
     long sqrtX = sqrt(X);
     //Precision error in sqrt capture:
@@ -87,20 +86,17 @@ long* primes_up_to(long X){
             }
         }
     }
-    // printf("\tcomp initialised\n")
-    long* primes = (long*)calloc(pi+1,sizeof(long));//extra entry for storing pi
-    primes[0]=pi;
+    long* prime_squares = (long*)calloc(pi+1,sizeof(long));//extra entry for storing pi
+    prime_squares[0]=pi;
     j=1;
     for(i=2; i<= X; i++){
         if(!comp[i]){
-            primes[j] = i;
+            prime_squares[j] = i*i;
             j++;
         }
     }
-    // printf("\tprimes initialised")
     free(comp);
-    // printf("...done")
-    return primes; //first entry is number of primes, rest are primes
+    return prime_squares; //first entry is number of primes, rest are prime squares
 }
 
 
@@ -110,12 +106,12 @@ long* primes_up_to(long X){
  * Gets an array `sqfull` of length X+1 such that `sqfull[n]` is false
  * if and only if `n` is squarefree (away from 2 and 3).
  * 
- * @param pp squares of primes at most X
  * @param X bound for array
  * @return array `sqfull` as required for `init`
  */
-long* get_sqfull(long* pp, long X){
+long* get_sqfull(long X){
     long i,n;
+    long* pp = prime_squares_up_to(X);
     long* sqfull = (long*)calloc((X+1),sizeof(long));
     sqfull[0]=X;
     sqfull[1]=0;
@@ -124,6 +120,7 @@ long* get_sqfull(long* pp, long X){
             sqfull[n]=1;
         }
     }
+    free(pp);
     return sqfull;
 }
 
@@ -420,23 +417,9 @@ int CCFCCFPRP_fixeda(long a, long* sqfull, long X, long tX, long B, FILE *fptr, 
  * @return 0
  */
 int CCFCCFPRP(long B, FILE *fptr, int verbose){
-    long i=0;
     if(verbose>=2){printf("Initialising...\n");}
-    long* p = primes_up_to(13*B);
-    if(verbose>=2){printf("...p initialised\n");}
-    long* pp = (long*)malloc((p[0]+1)*sizeof(long));
-    pp[0]=p[0];
-    for(i=1; i<=p[0]; i++){
-        pp[i]=p[i]*p[i];
-    }
-    if(verbose>=2){printf("...pp initialised\n");}
-    if(verbose>=2){printf("...dumping p...");}
-    free(p);
-    if(verbose>=2){printf("done.\n");}
-    long* sqfull = get_sqfull(pp,13*B);
-    free(pp);
+    long* sqfull = get_sqfull(13*B);
     if(verbose>=2){printf("...sqfull initialised\n");}
-    if(verbose>=2){printf("...done.\n");}
     // do looping
     long X=54*B*B, tX=3*X, a;
     double A_bd;
@@ -466,23 +449,9 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
  */
 
 int CCFCCFPRP_distributed(long B, long n1, long n2, FILE *fptr, int verbose){
-    long i=0;
     if(verbose>=2){printf("Initialising...\n");}
-    long* p = primes_up_to(13*B);
-    if(verbose>=2){printf("...p initialised\n");}
-    long* pp = (long*)malloc((p[0]+1)*sizeof(long));
-    pp[0]=p[0];
-    for(i=1; i<=p[0]; i++){
-        pp[i]=p[i]*p[i];
-    }
-    if(verbose>=2){printf("...pp initialised\n");}
-    if(verbose>=2){printf("...dumping p...");}
-    free(p);
-    if(verbose>=2){printf("done.\n");}
-    long* sqfull = get_sqfull(pp,13*B);
-    free(pp);
+    long* sqfull = get_sqfull(13*B);
     if(verbose>=2){printf("...sqfull initialised\n");}
-    if(verbose>=2){printf("...done.\n");}
     
     // do looping
     long X=54*B*B, tX=3*X, a, b, idx=0;

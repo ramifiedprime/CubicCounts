@@ -10,8 +10,8 @@ make
 ```
 This will produce the packaged executable `CCFCCFPRP.exe`.  The syntax for using this executable is then the below.
 ```bash
-./main.exe [-b] <B_or_exponent> <outfile>
-./main.exe [-b] <B_or_exponent> <n1> <n2> <outfile>
+./CCFCCFPRP.exe [-b] <B_or_exponent> <outfile>
+./CCFCCFPRP.exe [-b] <B_or_exponent> <n1> <n2> <outfile>
 ```
 if the `-b` flag is set then one should `<B_or_exponent>` to be the maximum number of bits for the product of ramified primes, else this should just be the bound for the product of ramified primes.  The second line is for parallelisation: it speficies that we only check the cubic forms with leading coefficient $a\equiv n_1\mod n_2$.
 

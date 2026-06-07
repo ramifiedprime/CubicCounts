@@ -421,11 +421,15 @@ int CCFCCFPRP(long B, FILE *fptr, int verbose){
     long* sqfull = get_sqfull(13*B);
     if(verbose>=2){printf("...sqfull initialised\n");}
     // do looping
-    long X=54*B*B, tX=3*X, a;
-    double A_bd;
+    long X=54*B*B, tX=3*X, a, b;
+    double A_bd,B_bd;
     A_bd=pow((16.0*X)/27, 1.0/4);
     for(a=1;a<=A_bd;a++){
-        CCFCCFPRP_fixeda(a,sqfull, X, tX, B,fptr,verbose);
+        B_bd=(3.0*(double)a)/2 + sqrt(sqrt(((double)X)/3) - (3.0*a*a)/4);
+        for(b=0; b<=B_bd; b++){
+            if(verbose>=2){printf("...a=%ld, b=%ld\n", a, b);}
+            CCFCCFPRP_fixed_ab(a,b,sqfull, X, tX, B,fptr,verbose);
+        }
     }
     if(verbose>=1){printf("...done.\n");}
     free(sqfull);

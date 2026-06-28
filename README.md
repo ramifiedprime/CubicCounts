@@ -31,6 +31,9 @@ This is the main directory of useful code.
 - *CCFCCF.mg*: an implementation of Belabas' CCFCCF in magma, seems to agree with output of pari-gp equivalent so hopefully few bugs.
 - *prototype.mg*: an initial attempt at implementing product of ramified primes in magma, probably full of bugs, decided midway that I was as well just doing it directly in C.
 
+## Acknowledgements
+This was all written by a human.  AI, namely Claude Opus and ChatGPT 5.5 pro, has been used to check for bugs.  All changes were made after human verification.
+
 ## Todo
 - [x] wrap CCFCCF.c into a library rather than a .c
 - [x] wrap CCFCCFPRP.c into a library rather than a .c
